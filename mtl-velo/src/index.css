@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@theme {
+  /* Tes 3 couleurs personnalisées */
+  --color-mtl-primaire: #15803D; /* Le vert de base */
+  --color-mtl-survol: #166534;   /* Le vert quand on passe la souris (équivalent à green-800) */
+  --color-mtl-actif: #14532D;    /* Le vert quand on a cliqué (équivalent à green-900) */
+}
