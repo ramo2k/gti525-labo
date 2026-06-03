@@ -1,82 +1,50 @@
-# DEMARCHE.md - Exemple
-
-> Le journal de démarche est requis pour **les deux parcours**. Le parcours avec IA y déclare son choix et y consigne les décisions techniques qui ne passent pas par l'IA ; le parcours sans IA y consigne l'ensemble des décisions techniques significatives. Cet exemple illustre principalement le parcours sans IA.
+# Journal de démarche - MTL Vélo (Phase 1)
 
 ---
 
 ## Équipe et parcours
 
-- **Équipe** : 14 - Membres : D. Bouchard, E. Côté, F. Ouellet
-- **Parcours déclaré** : **sans IA**
-- **Date de déclaration** : 2026-02-03
-- **Justification du choix** : nous trois venons d'apprendre HTML / CSS au cours précédent (LOG210) et nous voulons consolider les fondamentaux plutôt que déléguer immédiatement à un outil. Nous garderons la possibilité de réviser ce choix au début de la phase 2 si la complexité augmente, en le documentant ici.
+- **Équipe** : Omar Khudhair, Christian Junior Djomga
+- **Parcours déclaré** : **avec IA**
+- **Date de déclaration** : 14 mai 2026
+- **Justification du choix** : On a choisi d'utiliser l'IA pour aller plus vite sur la création de l'interface et pouvoir se concentrer sur la logique du projet. Ça nous permet de pratiquer comment bien utiliser l'IA (faire les bons prompts, vérifier le code) tout en préparant un code propre pour la suite.
 
 ---
 
-## Décision 1 - Choix du cadriciel front-end (T1)
+## Décision 1 - Choix du framework front-end (T1)
 
-**Auteure** : D. Bouchard - 2026-02-04 - commit `e7a1b3c`
+**Auteur** : Omar Khudhair - 2026-05-14
 
-**Problème** : faut-il utiliser un cadriciel (React, Vue, Alpine, htmx) ou rester en JavaScript vanille ?
-
-**Sources consultées** :
-- MDN, *Tools and testing - Client-side JavaScript frameworks* - vue d'ensemble des cadriciels modernes.
-- Article du blog `2ality.com` (Axel Rauschmayer), *Using web components in 2024*.
-- Documentation officielle de Vue.js (section *Getting started*, partie *Without build tools*).
+**Problème** : Est-ce qu'on fait juste du HTML/JS de base ou on prend le temps de monter un vrai framework pour l'interface ?
 
 **Alternatives envisagées** :
 
-| Option | Avantages | Inconvénients pour notre contexte |
+| Option | Avantages | Inconvénients |
 |---|---|---|
-| Vanille (zéro dépendance) | Aucun outil à apprendre. Code livré = code écrit. Aligne avec l'objectif « consolider les fondamentaux » de notre parcours. | Plus de code à écrire pour la réactivité (mise à jour du DOM à la main). |
-| Vue.js sans étape de compilation (CDN) | Réactivité automatique, lisibilité accrue des templates. | Une dépendance externe à comprendre. Risque de masquer ce que nous voulons apprendre. |
-| React | Très utilisé en industrie. | Demande JSX + une étape de compilation que nous n'avons pas le temps de mettre en place. Dépendances nombreuses. |
+| JS de base (Vanilla) | Rien à installer. On commence tout de suite. | Gérer le code à la main va devenir trop compliqué et long pour les phases 2 et 3. |
+| React via CDN | Facile à ajouter sans rien installer. | Plus dur pour bien séparer nos fichiers, gérer les pages et les données globales. |
+| React + Vite | Code propre et réutilisable, système de pages facile (React Router), bon environnement de travail. Parfait pour la suite du projet. | Demande de faire des commandes d'installation au début (Node.js/npm) et de bien organiser ses dossiers. |
 
-**Choix retenu** : **JavaScript vanille**, avec une petite couche de fonctions utilitaires (`render.js`) pour standardiser la mise à jour du DOM.
+**Choix retenu** : **React avec Vite**, et Tailwind CSS v4 pour le style.
 
-**Justification** : aligné avec notre décision de parcours. La phase 1 ne demande pas de réactivité complexe - le tableau et les filtres se mettent à jour sur clic ou input, sans état partagé global. Vanille suffit largement.
-
----
-
-## Obstacle 1 - Filtres qui ne se mettaient pas à jour ensemble (T3)
-
-**Auteur** : F. Ouellet - 2026-02-11 - commits `c1d4e2a` (problème), `b7f8c93` (correction)
-
-**Problème rencontré** : le tri par colonne et la recherche textuelle fonctionnaient indépendamment, mais une fois la recherche active, cliquer pour trier réinitialisait le filtre. L'utilisateur perdait son contexte.
-
-**Diagnostic** :
-1. J'ai d'abord pensé que c'était un problème d'événements (le clic sur l'en-tête déclencherait un `input` sur la zone de recherche). Mise d'un `console.log` dans chaque handler - pas le cas.
-2. Lu attentivement la fonction `trierParColonne` : elle réécrivait `tbody` à partir de `compteurs` (le tableau complet), pas à partir des résultats filtrés.
-
-**Sources consultées** :
-- MDN, *Array.prototype.filter* et *Array.prototype.sort* - pour confirmer que `sort` mute le tableau d'origine (donc trier `compteurs` aurait été un bug différent).
-
-**Solutions envisagées** :
-- Maintenir un tableau `compteursAffichés` séparé, recalculé chaque fois qu'un filtre change. Tri et recherche puisent dans ce tableau. **Choix retenu.**
-- Variante : recalculer `filtre puis tri` à chaque action utilisateur, sans tableau intermédiaire. Plus simple mais recalcule deux fois - pour 64 compteurs c'est imperceptible, mais c'est une mauvaise habitude à prendre.
-
-**Justification** : un tableau intermédiaire `compteursAffichés` rend l'ordre des opérations explicite (filtrer d'abord, trier ensuite) et facilite l'ajout de filtres supplémentaires en phase 2.
-
-**Leçon** : avant de se lancer dans les `console.log`, relire la fonction soupçonnée. La source du bug était évidente dans la fonction `trierParColonne` elle-même.
+**Justification** : Même si on aurait pu faire la Phase 1 avec du JS de base, c'est mieux de penser à tout le projet. Pour la Phase 2, on va devoir connecter un backend (Express) et des cartes interactives. Pour la Phase 3, des trucs plus poussés comme la connexion et le bot. React et Vite nous aident à bien organiser tout ça dès le début. Ça prend un peu plus de temps à configurer, mais l'IA nous aide à écrire le code de base très vite pour compenser.
 
 ---
 
-## Décision 3 - Structure des fichiers JS (C1)
+## Décision 2 - Choix de la technologie CSS (T1)
 
-*(Cette entrée serait écrite plus tard dans la phase. Laissée en stub pour montrer la progression.)*
+**Auteur** : Christian Junior Djomga - 2026-05-16
 
-**Auteure** : D. Bouchard - 2026-02-17 - commit `e3a8f12`
+**Problème** : Comment styler notre application ? Est-ce qu'on fait tout à la main en CSS pur, on utilise un truc tout fait comme Bootstrap, ou bien Tailwind ?
 
-**Problème** : à mesure que `main.js` grossit (au-delà de 250 lignes), nous voulons le diviser. Comment ?
+**Alternatives envisagées** :
 
-*[À compléter : alternatives envisagées (par responsabilité, par page, par couche), choix retenu, justification.]*
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| CSS pur | On contrôle absolument tout. Aucun outil à installer. | Très long à écrire. C'est dur de garder un style uniforme et de gérer le responsive sur plein de pages. |
+| Bootstrap | Facile à utiliser, plein de composants déjà prêts (boutons, cartes). | Le site finit par ressembler à tous les autres sites Bootstrap. Difficile à modifier si on veut un design précis. |
+| Tailwind CSS | Très rapide, on style directement dans nos fichiers React. Parfait pour le responsive. | Le code HTML peut devenir un peu chargé à lire avec toutes les classes. |
 
----
+**Choix retenu** : **Tailwind CSS v4**.
 
-## Réflexion sur la démarche (à étoffer au fil du projet)
-
-*Quelques notes en vrac, à reprendre dans la section R4 du rapport :*
-
-- La discipline de chercher avant de coder est inhabituelle pour nous - la tentation de « juste essayer » est forte. Mais la décision sur le cadriciel nous a évité plusieurs heures d'apprentissage de Vue qui n'aurait pas servi le projet.
-- Vérifier les contrastes à la conception, pas après - refaire toute la palette en cours de phase aurait été coûteux.
-- Documenter le bug du tri (Obstacle 1) prend cinq minutes ; le retrouver dans six mois prendrait des heures. Vrai gain.
+**Justification** : On voulait aller vite sans pour autant être bloqués par un design imposé comme avec Bootstrap. Tailwind marche super bien avec React : au lieu de changer de fichier à chaque fois pour faire du CSS, on met les classes directement dans nos composants. C'est beaucoup plus naturel et rapide pour nous, surtout quand on génère des bouts de code avec l'IA.
