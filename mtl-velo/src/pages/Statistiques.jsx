@@ -44,12 +44,21 @@ const Statistiques = () => {
   const [search, setSearch] = useState('');
   const [arrondissement, setArrondissement] = useState('');
 
+  // T2.5 : États de la pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   useEffect(() => {
     fetch('/data/territoires.geojson')
       .then(response => response.json())
       .then(data => setGeoJson(data))
       .catch(error => console.error("Erreur de chargement du GeoJSON:", error));
   }, []);
+
+  // T2.5 : Réinitialiser à la page 1 si on fait une recherche ou change de filtre
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, arrondissement]);
 
   const territoires = useMemo(() => {
     if (!territoiresData) return [];
@@ -80,6 +89,15 @@ const Statistiques = () => {
 
   const { items: sortedData, requestSort, sortConfig } = useSort(filteredData);
 
+  // T2.5 : Découpage des données selon la page active
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedData.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedData, currentPage]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+
+  // T2.4 : Ajout de la colonne "Carte"
   const columns = [
     { key: 'ID', label: 'ID' },
     { key: 'Nom', label: 'Nom' },
@@ -93,7 +111,34 @@ const Statistiques = () => {
       )
     },
     { key: 'Annee_implante', label: "Année" },
-    { key: 'Arrondissement', label: "Arrondissement" }
+    { key: 'Arrondissement', label: "Arrondissement" },
+    {
+      key: 'actions',
+      label: 'Carte',
+      sortable: false, // Empêche de trier sur la colonne des boutons
+      render: (row) => {
+        // Extraction des coordonnées pour générer le lien
+        const lat = row.Latitude || row.latitude;
+        const lon = row.Longitude || row.longitude;
+
+        if (!lat || !lon) {
+          return <span className="text-slate-400 text-xs italic">N/A</span>;
+        }
+
+        const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
+
+        return (
+          <a 
+            href={mapUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-block px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-medium rounded transition-colors duration-150"
+          >
+            Voir sur la carte
+          </a>
+        );
+      }
+    }
   ];
 
   const filters = (
@@ -128,8 +173,80 @@ const Statistiques = () => {
 
   return (
     <PageLayout title="Compteurs vélo" itemTotal={sortedData.length} filters={filters}>
-      {isLoading ? <p className="text-slate-500 animate-pulse">Chargement et calcul des arrondissements en cours...</p> : (
-        <DataTable columns={columns} data={sortedData} requestSort={requestSort} sortConfig={sortConfig} emptyMessage="Aucun compteur trouvé." />
+      {isLoading ? (
+        <p className="text-slate-500 animate-pulse">Chargement et calcul des arrondissements en cours...</p>
+      ) : (
+        <>
+          {/* T2.5 : On affiche paginatedData plutôt que sortedData */}
+          <DataTable 
+            columns={columns} 
+            data={paginatedData} 
+            requestSort={requestSort} 
+            sortConfig={sortConfig} 
+            emptyMessage="Aucun compteur trouvé." 
+          />
+
+          {/* T2.5 : Interface de pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 mt-4">
+              <div className="flex flex-1 justify-between sm:hidden">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className="px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  className="ml-3 px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Suivant
+                </button>
+              </div>
+              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-slate-700">
+                    Page <span className="font-medium">{currentPage}</span> sur <span className="font-medium">{totalPages}</span>
+                  </p>
+                </div>
+                <div>
+                  <nav className="inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(1)}
+                      className="px-3 py-2 border border-slate-300 bg-white text-sm font-medium text-slate-500 rounded-l-md hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      Début
+                    </button>
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      className="px-3 py-2 border border-slate-300 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      Précédent
+                    </button>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      className="px-3 py-2 border border-slate-300 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      Suivant
+                    </button>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                      className="px-3 py-2 border border-slate-300 bg-white text-sm font-medium text-slate-500 rounded-r-md hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      Fin
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </PageLayout>
   );
