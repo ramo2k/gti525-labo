@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import PageLayout from '../components/PageLayout';
 
-
 const ReseauCyclable = () => {
   const [geoJson, setGeoJson] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Chargement asynchrone du fichier GeoJSON
   useEffect(() => {
     fetch('/data/reseau_cyclable.geojson')
       .then(res => res.json())
@@ -13,12 +13,16 @@ const ReseauCyclable = () => {
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
-  // Calcul des stats : nombre de pistes et longueur totale
+  // T2.6 : Calcul des statistiques du réseau
   const stats = useMemo(() => {
     if (!geoJson) return null;
+    
     const features = geoJson.features ?? [];
     const totalPistes = features.length;
+    
+    // Fait la somme des longueurs (en mètres) puis divise par 1000 pour les kilomètres
     const totalKm = features.reduce((sum, f) => sum + (f.properties.LONGUEUR || 0), 0) / 1000;
+    
     return { totalPistes, totalKm: totalKm.toFixed(1) };
   }, [geoJson]);
 
@@ -27,23 +31,32 @@ const ReseauCyclable = () => {
       {loading ? (
         <p className="text-slate-500 animate-pulse">Chargement du réseau cyclable...</p>
       ) : (
-        <>
-          {/* Bandeau de statistiques */}
-          {stats && (
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1 bg-white rounded-lg border border-slate-200 p-4 text-center shadow-sm">
-                <p className="text-3xl font-bold text-mtl-primaire">{stats.totalPistes.toLocaleString('fr-CA')}</p>
-                <p className="text-sm text-slate-500 mt-1">Pistes cyclables</p>
-              </div>
-              <div className="flex-1 bg-white rounded-lg border border-slate-200 p-4 text-center shadow-sm">
-                <p className="text-3xl font-bold text-mtl-primaire">{Number(stats.totalKm).toLocaleString('fr-CA')} km</p>
-                <p className="text-sm text-slate-500 mt-1">Longueur totale</p>
-              </div>
+        // Affiche les cartes de statistiques si les données sont prêtes
+        stats && (
+          <div className="flex flex-col sm:flex-row gap-6 mb-8">
+            
+            {/* Carte de statistique : Nombre de pistes */}
+            <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center hover:shadow-md transition-shadow">
+              <p className="text-4xl font-extrabold text-mtl-primaire mb-2">
+                {stats.totalPistes.toLocaleString('fr-CA')}
+              </p>
+              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+                Pistes cyclables
+              </p>
             </div>
-          )}
-
-          {/* Reste du contenu existant de la page ici */}
-        </>
+            
+            {/* Carte de statistique : Longueur totale */}
+            <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center hover:shadow-md transition-shadow">
+              <p className="text-4xl font-extrabold text-mtl-primaire mb-2">
+                {Number(stats.totalKm).toLocaleString('fr-CA')} km
+              </p>
+              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+                Longueur totale
+              </p>
+            </div>
+            
+          </div>
+        )
       )}
     </PageLayout>
   );

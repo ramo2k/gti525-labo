@@ -4,29 +4,27 @@ import Statistiques from './pages/Statistiques';
 import POI from './pages/POI';
 import Reseau from './pages/Reseau';
 
+// T1.1 : Squelette et navigation
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900">
+      <div className="flex flex-col min-h-screen">
         <Navbar />
         
-        {/* Contenu principal */}
-        <main className="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Zone de contenu principal centralisée */}
+        <main className="flex-grow max-w-screen-xl mx-auto w-full p-4">
           <Routes>
-            <Route path="/" element={<h1 className="text-3xl font-bold">Accueil - MTL Vélo</h1>} />
+            <Route path="/" element={<h1>Accueil - MTL Vélo</h1>} />
             <Route path="/reseau" element={<Reseau />} />
-            
-            {/* C'est ici qu'on ajoute nos nouvelles pages ! */}
             <Route path="/statistiques" element={<Statistiques />} />
             <Route path="/poi" element={<POI />} />
-            
-            <Route path="/assistant" element={<h1 className="text-3xl font-bold">Assistant Vélobot</h1>} />
-            <Route path="/a-propos" element={<h1 className="text-3xl font-bold">À propos de MTL Vélo</h1>} />
+            <Route path="/assistant" element={<h1>Assistant Vélobot</h1>} />
+            <Route path="/a-propos" element={<h1>À propos</h1>} />
           </Routes>
         </main>
 
-        <footer className="bg-slate-800 text-white p-4 text-center mt-auto">
-          <p>&copy; 2026 MTL Vélo - GTI525</p>
+        <footer className="bg-mtl-primaire text-white p-4 text-center mt-auto">
+          <p>&copy; 2026 MTL Vélo</p>
         </footer>
       </div>
     </Router>
