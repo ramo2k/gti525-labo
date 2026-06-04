@@ -2,51 +2,51 @@
 
 ## Équipe et parcours
 
-- **Équipe** : 07 - Membres : A. Tremblay, B. Lavoie, C. Singh
+- **Équipe** : 07 - Membres : Omar Khudhair, Christian Junior Djomga
 - **Parcours déclaré** : avec IA
-- **Outils utilisés ce trimestre** : Claude 4.6 Sonnet (web), GitHub Copilot dans VS Code
+- **Outils utilisés ce trimestre** : Gemini Pro
 
 ---
 
-## Entrée 1 - Génération du tri par colonne (T3.1)
+## Entrée 1 - Ajout des boutons pour voir la carte, des limites de page et des données de réseau
 
-**Auteure** : A. Tremblay - 2026-02-10 - commit `a3f1b2c`
+**Auteure** : Christian Junior Djomga - 2026-06-03 - commit `8c6ae234a4b3afb8d4053c39fdadfb1039a5c859` et `82f20d3d19d6c6e2f6ee6250609e7c7f6740e819`
 
 **Prompt** (Claude Sonnet 4.6) :
 
-> J'ai un tableau HTML qui affiche des compteurs de vélo (id, nom, statut, année). Je veux que cliquer sur l'en-tête d'une colonne trie le tableau selon cette colonne, en alternant ascendant / descendant. Le tableau est rempli depuis un tableau JS `compteurs`. Je préfère du JS moderne sans dépendances. Pas de jQuery. Donne-moi le code de la fonction de tri et l'attache des événements.
+> aide moi à faire ces parties:T2.4: Pour chaque élément, ajouter un bouton « Voir sur la carte » ouvrant sa position dans Google Maps ou OpenStreetMap à partir des coordonnées. T2.5: Limiter l'affichage des points d'intérêt à 20 par page (pagination ou défilement). T2.6: À partir de reseau_cyclable.geojson, calculer et afficher le nombre total de pistes et leur longueur cumulée (km) sur la page « Réseau cyclable ». 
 
-**Sortie** : 42 lignes de JS - fonction `sortByColumn(key)` + boucle d'attache des `addEventListener` sur les `<th>`. Voir le commit pour la version brute (avant modifications).
+
+
+**Sortie** : Les pages POI.jsx, Statistiques.jsx, Réseau.jsx et APP.jsx avec les fonctionnalités demandées inplémentées.
 
 **Modifications apportées** :
-- Renommé `sortByColumn` en `trierParColonne` pour cohérence avec le reste du code en français.
-- Ajouté un indicateur visuel (▲ / ▼) dans l'en-tête de la colonne triée - la sortie ne le faisait pas.
-- Remplacé `arr.sort((a,b) => a[key] > b[key] ? 1 : -1)` par une comparaison stable qui gère les nombres et les chaînes différemment (la version générée triait `"10"` avant `"2"` pour la colonne année).
+- **Rejet quasi total**: Réécriture complète des fonctionnalités à cause du manque de lisibilé et clarté du code.
 
 **Justification du jugement critique** :
-- **Accepté** : la structure générale (état `sortAsc` partagé, attache des événements) - claire et idiomatique.
-- **Modifié** : le tri sur les nombres était incorrect (comparaison lexicographique). C'est exactement le genre d'erreur silencieuse qu'on attend qu'un humain attrape. Sans l'indicateur visuel, l'utilisateur ne sait pas quelle colonne est triée - exigence T1.1 implicite.
-- **Leçon** : préciser dans le prompt « les colonnes contiennent des nombres et des chaînes » aurait probablement évité l'erreur.
+- **Rejeté** : Bien que la structure générale des pages respectait les attentes, le code était beaucoup trop long et difficile à comprendre.
+- **Leçon** : préciser dan sle prompt son propre niveau de compétence et ajouter des précision quant à la qualité du code attendu
 
 ---
 
 ## Entrée 2 - Filtre par arrondissement (T3.3)
 
-**Auteur** : B. Lavoie - 2026-02-12 - commit `f9c0d4e`
+**Auteur** : Christian Junior Djomga - 2026-06-03 - commit `42ba90f9898c8017192a4a5638f0e10da759f4e5`
 
-**Prompt** (Copilot, complétion inline) :
+**Prompt** (Gemini Pro) :
 
-> // Filtrer la liste des points d'intérêt selon l'arrondissement sélectionné
-> // dans le menu déroulant #filtre-arr. Mettre à jour le tableau et le compteur de résultats.
+>Aide moi à implémenter les fonctionnalités suivantes. Je veux que tu ajoutes le nécessaire pour la réalisation des fonctionnalités sans supprimer ce qui est déjà présent si possible. Le nouveau code produit doit être le plus simple et court possible, mets y juste le strict nécessaire pour le fonctionnement des fonctionnalités en commentant le plus possible. Voici les fonctionnalités : Pour chaque élément, ajouter un bouton « Voir sur la carte » ouvrant sa position dans Google Maps ou OpenStreetMap à partir des coordonnées. Limiter l'affichage des points d'intérêt à 20 par page. À partir de reseau_cyclable.geojson, calculer et afficher le nombre total de pistes et leur longueur cumulée (km) sur la page « Réseau cyclable ».
 
-**Sortie** : Copilot a proposé une fonction `filtrerParArrondissement()` qui filtre `pointsInteret` et réécrit le tableau via `innerHTML += ...`.
+**Sortie** : Une version simplifiée de l'implémentation des pages POI.jsx, Statistiques.jsx et Réseau.jsx.
 
 **Modifications apportées** :
-- **Rejet quasi total**. Réécrit la fonction de zéro en utilisant `tbody.replaceChildren(...)` au lieu de `innerHTML += ...`.
+- suppression des fonctions haversineKm et lineLength et modification de la méthode de calcul de totalkm
+- Ajout de commentaires.
 
 **Justification du jugement critique** :
-- **Rejeté** : `innerHTML += ...` avec des données externes est un vecteur d'injection XSS (les noms d'arrondissements viennent d'un fichier qu'on contrôle ici, mais c'est une habitude à ne pas prendre, et T2.1 mentionne déjà que les données du POI peuvent contenir des caractères spéciaux). De plus, `+=` reparse l'intégralité du `tbody` à chaque appel - comportement quadratique sur les listes longues.
-- **Leçon** : Copilot, sans contexte sur la sécurité, propose souvent le chemin le plus court. À surveiller pour toute manipulation du DOM avec des données externes.
+- **Accepté** : Le fait qu'on utilise `usememo` facilite beaucoup le calcul de longueur.
+-**Modifié**: Les méthodes utilisées pour le calcul de totalkm sont inutiles et encombre le code.
+- **Leçon** : Donner à l'AI tous les fichiers concernant la tache demandée pour éviter qu'il fasse de mauvaise estimation.
 
 ---
 

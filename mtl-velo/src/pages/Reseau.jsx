@@ -1,32 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import PageLayout from '../components/PageLayout';
 
-// Calcule la distance en km entre deux points GPS (formule de Haversine)
-const haversineKm = (coord1, coord2) => {
-  const R = 6371;
-  const toRad = deg => deg * Math.PI / 180;
-  const dLat = toRad(coord2[1] - coord1[1]);
-  const dLon = toRad(coord2[0] - coord1[0]);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(coord1[1])) * Math.cos(toRad(coord2[1])) *
-    Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
-// Calcule la longueur en km d'une LineString ou MultiLineString
-const lineLength = (geometry) => {
-  if (geometry.type === 'LineString') {
-    return geometry.coordinates.reduce((sum, coord, i, arr) =>
-      i === 0 ? 0 : sum + haversineKm(arr[i - 1], coord), 0);
-  }
-  if (geometry.type === 'MultiLineString') {
-    return geometry.coordinates.reduce((total, line) =>
-      total + line.reduce((sum, coord, i, arr) =>
-        i === 0 ? 0 : sum + haversineKm(arr[i - 1], coord), 0), 0);
-  }
-  return 0;
-};
 
 const ReseauCyclable = () => {
   const [geoJson, setGeoJson] = useState(null);
@@ -44,7 +18,7 @@ const ReseauCyclable = () => {
     if (!geoJson) return null;
     const features = geoJson.features ?? [];
     const totalPistes = features.length;
-    const totalKm = features.reduce((sum, f) => sum + lineLength(f.geometry), 0);
+    const totalKm = features.reduce((sum, f) => sum + (f.properties.LONGUEUR || 0), 0) / 1000;
     return { totalPistes, totalKm: totalKm.toFixed(1) };
   }, [geoJson]);
 
