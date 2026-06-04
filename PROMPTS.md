@@ -67,6 +67,7 @@
 - **Accepté** : Le code des themes de couleurs custom avec Tailwind est super propre, ça évite de créer plein de fichiers CSS.
 - **Modifié** : L'IA n'est vraiment pas bonne pour calculer les vrais ratios de contraste avec des chiffres. Il ne fallait pas lui faire confiance à l'aveugle.
 - **Leçon** : Pour des critères stricts (comme l'accessibilité), l'IA donne une bonne base pour commencer, mais il faut absolument tout revérifier soi-même avec des vrais outils (comme WebAIM).
+
 ---
 
 ## Entrée 4 - Refactorisation avec Custom Hooks et composants modulaires (T2.1, T1.4)
@@ -136,9 +137,32 @@
 
 ---
 
+## Entrée 7 - Refactorisation globale et standards de commentaires
+
+**Auteur** : Omar Khudhair - 2026-06-04 - commit `f8b5c23`
+
+**Prompt** (Gemini Pro) :
+
+> Refais la page au complet. Je veux que tu changes le code pour qu'il soit lisible et facile à comprendre lorsqu'on le survole. Enlève tout le code de Tailwind CSS qui ne sert à rien. Ajoute des commentaires minimalistes par cas.
+
+**Sortie** : L'IA a fourni la version refactorisée de tous les composants (`POI.jsx`, `Statistiques.jsx`, `DataTable.jsx`, `PageLayout.jsx`, `Navbar.jsx` et les hooks). Le code était beaucoup plus court, les variables mieux nommées, et les commentaires respectaient les exigences liées aux tâches du TP (ex: T1.4, T2.1).
+
+**Modifications apportées** :
+- J'ai dû forcer l'IA à me redonner le code complet de chaque fichier, car elle avait la mauvaise habitude de ne générer que des petits morceaux de code difficiles à intégrer.
+- J'ai réajusté le style visuel avec l'IA. Son premier "nettoyage" de Tailwind avait rendu l'interface trop carrée et fade. J'ai exigé de ramener des bords arrondis (`rounded-lg`, `rounded-full`) et des ombres pour garder un aspect moderne.
+- J'ai ajouté une condition logique dans `PageLayout.jsx` pour faire disparaître le panneau latéral si aucun filtre n'est passé en paramètre.
+
+**Justification du jugement critique** :
+- **Accepté** : La base de refactorisation était solide. Les commentaires ajoutés expliquent très bien le rôle des paramètres dans les hooks et les composants réutilisables, ce qui rend le projet professionnel.
+- **Modifié** : J'ai refusé de sacrifier l'expérience utilisateur (UI) au profit d'un code "minimaliste". J'ai donc exigé un compromis pour avoir un beau design tout en gardant un code épuré.
+- **Leçon** : Quand on demande à une IA de "nettoyer", elle peut parfois supprimer des éléments de design essentiels. Il faut être ultra précis et directif (ex: "donne-moi le fichier entier", "ne fais pas de listes numérotées") pour obtenir exactement le résultat voulu sans perdre de temps.
+
+---
+
 ## Hallucinations rencontrées 
 
-*À compléter si rencontré.*
+- **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
+- **Invention de données CSV inexistantes** : L'IA assume parfois que nos données sont parfaites. Lors du filtre par arrondissement, elle a généré du code en assumant qu'il y avait une colonne "Arrondissement" dans le fichier `compteurs.csv`, ce qui était totalement faux. Elle a inventé la structure de données au lieu de vérifier.
 
 ---
 
