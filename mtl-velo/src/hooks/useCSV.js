@@ -11,9 +11,11 @@ export const useCSV = (url, options = {}) => {
   const [data, setData] = useState([]);
   // loading : Indique si l'application est en train de télécharger le fichier
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
     
     // Utilisation de la librairie PapaParse pour lire le fichier distant
     Papa.parse(url, {
@@ -26,9 +28,13 @@ export const useCSV = (url, options = {}) => {
       complete: (results) => {
         setData(results.data);
         setLoading(false);
+      },
+      error: (err) => {
+        setError(err);
+        setLoading(false);
       }
     });
   }, [url]); // Le useEffect se redéclenche uniquement si l'URL change
 
-  return { data, loading };
+  return { data, loading, error };
 };

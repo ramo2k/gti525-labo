@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Tes 3 couleurs personnalisées */
-  --color-mtl-primaire: #15803D; /* Le vert de base */
-  --color-mtl-survol: #166534;   /* Le vert quand on passe la souris (équivalent à green-800) */
-  --color-mtl-actif: #14532D;    /* Le vert quand on a cliqué (équivalent à green-900) */
+  /* 
+   * Couleurs du thème MTL Vélo 
+   * Validation WCAG 2.1 AA (Contraste minimal requis 4.5:1)
+   */
+  --color-mtl-primaire: #15803D; /* Contraste avec blanc (#FFFFFF) = 5.01:1 (Conforme) */
+  --color-mtl-fond: #F1F5F9;     /* Fond clair réduisant la fatigue visuelle */
+  --color-mtl-texte: #0F172A;    /* Texte sombre offrant une excellente lisibilité */
 }

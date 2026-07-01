@@ -17,7 +17,7 @@ const Navbar = () => {
   const getLinkStyle = (isActive, isMobile = false) => {
     // Utilise rounded-full pour un effet très arrondi (pilule) sur PC, et rounded-lg sur mobile
     const baseStyle = isMobile ? "block px-4 py-3 rounded-lg transition-colors" : "px-4 py-2 rounded-full transition-colors";
-    const stateStyle = isActive ? "bg-mtl-actif text-white font-bold" : "text-white hover:bg-mtl-survol";
+    const stateStyle = isActive ? "bg-black/30 text-white font-bold" : "text-white hover:bg-black/20";
     return `${baseStyle} ${stateStyle}`;
   };
 
@@ -42,21 +42,24 @@ const Navbar = () => {
 
         {/* Bouton pour ouvrir/fermer le menu Mobile */}
         <button 
-          className="md:hidden text-white p-2 rounded-full hover:bg-mtl-survol transition-colors"
+          className="md:hidden text-white p-2 rounded-full hover:bg-black/20 transition-colors"
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-expanded={isOpen}
+          aria-controls="mobile-menu"
         >
           {/* Alterne l'icône entre le X (fermer) et les 3 lignes (ouvrir) */}
           {isOpen ? (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
           ) : (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
           )}
         </button>
       </nav>
 
       {/* Menu déroulant format Mobile */}
       {isOpen && (
-        <div className="md:hidden bg-mtl-primaire flex flex-col p-3 border-t border-mtl-survol space-y-2 shadow-inner">
+        <div id="mobile-menu" className="md:hidden bg-mtl-primaire flex flex-col p-3 border-t border-black/20 space-y-2 shadow-inner">
           <NavLink to="/" onClick={closeMenu} className={({ isActive }) => getLinkStyle(isActive, true)}>Accueil</NavLink>
           <NavLink to="/reseau" onClick={closeMenu} className={({ isActive }) => getLinkStyle(isActive, true)}>Réseau cyclable</NavLink>
           <NavLink to="/statistiques" onClick={closeMenu} className={({ isActive }) => getLinkStyle(isActive, true)}>Statistiques</NavLink>

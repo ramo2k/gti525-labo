@@ -14,7 +14,7 @@ const openMap = (lat, lng) => {
 
 const POI = () => {
   // T2.1 : Chargement des données CSV via notre hook personnalisé
-  const { data, loading } = useCSV('/data/poi.csv'); 
+  const { data, loading, error } = useCSV('/data/poi.csv'); 
   // L'option header: false indique que ce fichier n'a pas de ligne de titre
   const { data: territoiresData } = useCSV('/data/territoires.csv', { header: false }); 
   
@@ -58,7 +58,7 @@ const POI = () => {
       key: 'Type', 
       label: 'Type', 
       // Ajout d'un badge visuel pour le type
-      render: () => <span className="px-3 py-1 text-xs rounded-full font-bold bg-blue-100 text-blue-800">Fontaine</span> 
+      render: () => <span className="px-3 py-1 text-xs rounded-full font-bold bg-mtl-fond border border-mtl-texte/20 text-mtl-texte">Fontaine</span> 
     },
     { key: 'Nom_parc_lieu', label: 'Nom du lieu' },
     { key: 'Intersection', label: 'Adresse' },
@@ -70,12 +70,12 @@ const POI = () => {
       render: (row) => row.Latitude && row.Longitude ? (
         <button
           onClick={() => openMap(row.Latitude, row.Longitude)}
-          className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-mtl-survol transition-colors"
+          className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-green-800 transition-colors"
           title="Voir sur OpenStreetMap"
         >
           Carte
         </button>
-      ) : <span className="text-slate-400 text-xs italic">N/A</span>
+      ) : <span className="text-mtl-texte/50 text-xs italic">N/A</span>
     }
   ];
 
@@ -83,9 +83,10 @@ const POI = () => {
   const filters = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">Arrondissement</label>
+        <label htmlFor="arrondissement-select" className="text-sm font-medium text-mtl-texte">Arrondissement</label>
         <select 
-          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
+          id="arrondissement-select"
+          className="w-full border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
           value={arrondissement} 
           onChange={handleArrondissementChange}
         >
@@ -100,8 +101,13 @@ const POI = () => {
 
   return (
     <PageLayout title="Points d'intérêt" itemTotal={sortedData.length} filters={filters}>
-      {/* Affiche un indicateur pendant le chargement initial */}
-      {loading ? <p className="text-slate-500 animate-pulse">Chargement des données...</p> : (
+      {/* Affiche un indicateur pendant le chargement initial ou une erreur */}
+      {error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Erreur de chargement ! </strong>
+          <span className="block sm:inline">Impossible de récupérer les données des points d'intérêt.</span>
+        </div>
+      ) : loading ? <p className="text-mtl-texte/70 animate-pulse">Chargement des données...</p> : (
         <>
           <DataTable
             columns={columns}
@@ -113,20 +119,20 @@ const POI = () => {
 
           {/* T2.5 : Affiche les boutons de pagination seulement s'il y a plus d'une page */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200">
-              <span className="text-sm font-medium text-slate-600">Page {page} sur {totalPages}</span>
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-mtl-texte/20">
+              <span className="text-sm font-medium text-mtl-texte/80">Page {page} sur {totalPages}</span>
               <div className="flex gap-2">
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))} 
                   disabled={page === 1} 
-                  className="px-4 py-2 text-sm font-medium rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium rounded-md border border-mtl-texte/30 bg-white text-mtl-texte hover:bg-mtl-fond disabled:opacity-50 transition-colors"
                 >
                   Précédent
                 </button>
                 <button 
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
                   disabled={page === totalPages} 
-                  className="px-4 py-2 text-sm font-medium rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium rounded-md border border-mtl-texte/30 bg-white text-mtl-texte hover:bg-mtl-fond disabled:opacity-50 transition-colors"
                 >
                   Suivant
                 </button>

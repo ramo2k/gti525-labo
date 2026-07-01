@@ -45,19 +45,27 @@ const openMap = (lat, lng) => {
 
 const Statistiques = () => {
   // T2.1 : Chargement des compteurs
-  const { data: compteursData, loading: loadingCSV } = useCSV('/data/compteurs.csv');
+  const { data: compteursData, loading: loadingCSV, error: errorCSV } = useCSV('/data/compteurs.csv');
   // L'option header: false lit le fichier même sans ligne de titre
   const { data: territoiresData } = useCSV('/data/territoires.csv', { header: false }); 
   
   const [geoJson, setGeoJson] = useState(null);
+  const [errorGeoJson, setErrorGeoJson] = useState(null);
   const [search, setSearch] = useState('');
   const [arrondissement, setArrondissement] = useState('');
 
   // Chargement asynchrone des frontières géographiques
   useEffect(() => {
     fetch('/data/territoires.geojson')
-      .then(response => response.json())
-      .then(data => setGeoJson(data));
+      .then(response => {
+        if (!response.ok) throw new Error("Réseau: " + response.statusText);
+        return response.json();
+      })
+      .then(data => setGeoJson(data))
+      .catch(err => {
+        console.error("Erreur GeoJSON", err);
+        setErrorGeoJson(err);
+      });
   }, []);
 
   // Liste des arrondissements pour le menu déroulant
@@ -121,12 +129,12 @@ const Statistiques = () => {
       render: (row) => row.Latitude && row.Longitude ? (
         <button
           onClick={() => openMap(row.Latitude, row.Longitude)}
-          className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-mtl-survol transition-colors"
+          className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-green-800 transition-colors"
           title="Voir sur OpenStreetMap"
         >
           Carte
         </button>
-      ) : <span className="text-slate-400 text-xs italic">N/A</span>
+      ) : <span className="text-mtl-texte/50 text-xs italic">N/A</span>
     }
   ];
 
@@ -134,10 +142,11 @@ const Statistiques = () => {
   const filters = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">Recherche par nom</label>
+        <label htmlFor="search-input" className="text-sm font-medium text-mtl-texte">Recherche par nom</label>
         <input 
+          id="search-input"
           type="text" 
-          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
+          className="w-full border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
           placeholder="Ex: Rachel / Papineau"
           value={search} 
           onChange={(e) => setSearch(e.target.value)} 
@@ -145,9 +154,10 @@ const Statistiques = () => {
       </div>
       
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">Arrondissement</label>
+        <label htmlFor="arrondissement-select" className="text-sm font-medium text-mtl-texte">Arrondissement</label>
         <select 
-          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
+          id="arrondissement-select"
+          className="w-full border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
           value={arrondissement} 
           onChange={(e) => setArrondissement(e.target.value)}
         >
@@ -160,13 +170,20 @@ const Statistiques = () => {
     </div>
   );
 
-  // On attend que les deux sources de données soient prêtes
-  const isLoading = loadingCSV || !geoJson;
+  // On attend que les deux sources de données soient prêtes (ou qu'une erreur survienne)
+  const isLoading = loadingCSV || (!geoJson && !errorGeoJson);
+  const hasError = errorCSV || errorGeoJson;
 
   return (
     <PageLayout title="Compteurs vélo" itemTotal={sortedData.length} filters={filters}>
-      {/* Message d'attente pendant l'analyse mathématique des coordonnées */}
-      {isLoading ? <p className="text-slate-500 animate-pulse">Analyse géographique en cours...</p> : (
+      {hasError ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Erreur de chargement ! </strong>
+          <span className="block sm:inline">Impossible de récupérer les données des compteurs ou des territoires. Veuillez vérifier votre connexion.</span>
+        </div>
+      ) : isLoading ? (
+        <p className="text-mtl-texte/70 animate-pulse">Analyse géographique en cours...</p> 
+      ) : (
         <DataTable 
           columns={columns} 
           data={sortedData} 

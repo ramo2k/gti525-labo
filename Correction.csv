@@ -1,0 +1,80 @@
+GTI525 — Technologies de développement Internet,,,,,
+Grille d'évaluation — Phase 1 — Conception du front-end,,,,,
+Application « MTL Vélo » — Parcours classique ou augmenté par l'IA,,,,,
+?  PROPOSITION D'ÉVALUATION — à valider par le chargé(e) de laboratoire. Les notes et pénalités proposées doivent être vérifiées avant d'être communiquées à l'équipe.,,,,,
+,,,,,
+Identification,,,,,
+Équipe n°,,17,Date,,2026-06-17
+Section,,01,Chargé(e) de laboratoire,,Marcos Dias de Assunção
+Membre 1,,Omar Khudhair,Membre 2,,Christian Junior Djomga
+Membre 3,,,Lien dépôt Git,,https://github.com/ramo2k/gti525-labo
+Tag de soumission,,phase1-submission,SHA du commit,,7c8b961ebb72b0ced7cea06d0226a3495b543613
+,,,,,
+Parcours déclaré par l'équipe,,,,,
+?,Parcours augmenté par l'IA,(évalué via PROMPTS.md + DEMARCHE.md),,,
+?,Parcours classique sans IA,(évalué via DEMARCHE.md uniquement),,,
+?,Parcours non déclaré,(absence de DEMARCHE.md — voir la pénalité correspondante),,,
+,,,,,
+Vérifications préalables,,,,,
+"Pour chaque ligne, attribuer une note entre 0 et le maximum et inscrire un commentaire. Les notes proposées s'appuient sur des éléments observables du dépôt ; les critères non évaluables sans la démo ou le rapport restent vides.",,,,,
+"Vérification du tag : git fetch --tags && git rev-parse phase1-submission. Si le tag est absent, divergent du SHA déposé ou créé après la date limite, appliquer la pénalité de soumission et évaluer la version pointée par le tag.",,,,,
+,,,,,
+1. Démonstration en direct  —  25 points,,,,,
+#,Critère,Description,Max,Note,Commentaires
+D1,Navigation et structure,"Toutes les pages prévues sont présentes, la navigation fonctionne, l'état actif et l'état :hover sont visibles.",5,3.,Il manque quelques éléments dans Home. À propos pas implémentée.
+D2,Affichage des données,Les compteurs et points d'intérêt sont chargés depuis les fichiers et correctement affichés.,5,5.,
+D3,"Tri, recherche, filtres","Le tri par colonne, la recherche par nom et le filtre par arrondissement fonctionnent en direct.",5,5.,
+D4,Thème et accessibilité,Le thème respecte les contrastes WCAG ; les couleurs sont cohérentes ; la mise en page reste lisible.,5,5.,
+D5,Maîtrise du code,Chaque membre explique son code et défend ses choix techniques.,5,5.,
+Sous-total — démonstration,,,25,23.,
+,,,,,
+2. Code et dépôt Git  —  35 points,,,,,
+#,Critère,Description,Max,Note,Commentaires
+C1,Structure du code,"HTML sémantique, séparation HTML / CSS / JS, modules JS organisés.",8,8.,"header/nav/main/footer ?, NavLink actif ?, focus:ring sur inputs ?. Mais : lang='en' dans index.html (app entièrement en français — WCAG 3.1.1), labels sans htmlFor ni id sur tous les champs de filtre (Statistiques.jsx:138, POI.jsx:86), hamburger <button> sans aria-label/aria-expanded/aria-controls (Navbar.jsx:44), tri via onClick sur <th> au lieu d'un <button> (DataTable.jsx:22), aucun skip link, aucun aria-live sur le compteur de résultats."
+C2,Qualité CSS,"Flexbox / Grid, pas de tableaux HTML pour la mise en page, classes cohérentes.",5,3.,"Tailwind v4 @theme avec 3 tokens (mtl-primaire #15803D, mtl-survol #166534, mtl-actif #14532D), usage cohérent dans tous les composants. PROMPTS.md entrée 3 montre vérification WebAIM et modification manuelle du ratio. Mais seulement 3 tokens (nuances du même vert), aucun token pour texte/fond/surface, aucune documentation de contraste dans le code (index.css = 7 lignes, aucun commentaire ratio)."
+C3,Qualité JS,"Code lisible, fonctions courtes, gestion d'erreurs minimale présente.",7,6.,"PapaParse (justifié dans DEMARCHE D4) ?, useCSV + useSort hooks génériques ?, DataTable + PageLayout composants réutilisables (DRY/SOLID) ?, point-in-polygon ray-casting (MultiPolygon) ?, useMemo sur enrichissement+filtrage ?, pagination avec reset au filtre ?, toLocaleString('fr-CA') ?. Lacunes : useCSV sans état error (Statistiques reste en 'chargement' si le fetch échoue), GeoJSON fetch dans Statistiques sans .catch (Statistiques.jsx:57-61), sort sans localeCompare('fr') (useSort.js:25-26)."
+C4,Dépôt Git,"Commits réguliers des trois membres, messages clairs, [IA] présent si applicable.",5,4.,"8/17 commits marqués [IA] (cohérent avec les 7 entrées PROMPTS.md) ?, 2 branches (omar, christian) + 2 PRs ?, messages descriptifs ?. Répartition : Omar 65%, Christian 35% — acceptable pour 2 membres, mais légèrement déséquilibré (5 entrées PROMPTS Omar, 2 Christian)."
+C5,Journal de démarche,Parcours avec IA : PROMPTS.md à jour. Parcours sans IA : DEMARCHE.md à jour.,10,10.,"PROMPTS.md : 7 entrées liées aux commits, 2 auteurs (Christian entrées 1-2, Omar entrées 3-7), prompts réels inclus. Section hallucinations ? (colonne inventée, sur-ingénierie Tailwind). Entrée 1 : rejet quasi-total (code illisible, réécriture complète) — jugement critique honnête. Entrée 5 : hallucination détectée et corrigée (Ray-Casting). DEMARCHE : 4 décisions avec tableau d'alternatives + justification."
+Sous-total — code,,,35,31.,
+,,,,,
+3. Rapport  —  40 points,,,,,
+#,Critère,Description,Max,Note,Commentaires
+R1,Architecture,"Description claire, rôle des modules, justification du cadriciel.",8,6.,"React+Vite vs Vanilla JS vs CDN comparé et justifié (phases futures) ?. Tableau fichier/rôle pour chaque module ?. Tailwind justifié vs Bootstrap vs CSS pur (DEMARCHE D2). Limites : pas de description du flux de données (useCSV?useMemo?filtrage), pas de discussion sur la gestion d'erreurs, pas mention du routage React Router ni de la structure SPA."
+R2,Implémentation,"Explication concise du tri, de la recherche et du filtrage.",6,4.,"Tri (useSort + useMemo, asc/desc, numérique/chaîne) bien décrit ?. Recherche (useState + useMemo + filter/includes + toLowerCase) ?. Ray-Casting (isPointInPolygon) expliqué clairement ?. Réseau : le rapport décrit la formule haversine mais le code final utilise f.properties.LONGUEUR/1000 (haversine supprimée — PROMPTS.md entrée 2). Incohérence rapport/implémentation. Pagination non mentionnée."
+R3,Accessibilité et thème,"Couleurs documentées, démarche d'accessibilité.",6,6.,"Tableau couleurs hex+ratio (3 lignes : #15803D 5,01:1, #F1F5F9 fond, #0F172A texte) ?. HTML sémantique listé ?. Responsive décrit (max-w-screen-xl, filtres+contenu, hamburger) ?. Mais : revendique 'boutons de tri accessibles via Tab' — le tri est sur <th> onClick (DataTable.jsx:22), non accessible au clavier. Labels sans htmlFor non mentionnés. Aucune mention de skip link, aria-sort, aria-live, aria-expanded."
+R4,Démarche professionnelle et réflexion critique,Section dédiée du rapport rendant compte du parcours choisi.,12,10.,"2 outils (Claude Sonnet 4.6 + Gemini Pro) avec rôles distincts justifiés ?. Tâches déléguées listées ?. Évolution des prompts : vagues?précis avec contraintes (retourner fichiers complets, interdire listes numérotées) ?. Erreurs documentées : invention de colonne CSV, sur-ingénierie Tailwind ?. Gain 50% estimé ?. 4 mesures de maîtrise (explication, relecture, PROMPTS.md, 0 intégration sans relecture) ?. Solide mais section brève ; aurrait gagné à détailler l'évolution par commit."
+R5,Répartition et présentation,"Rôles précis, intro / conclusion soignées, qualité de la mise en page.",8,6.,"Tableau de répartition par membre avec contributions spécifiques (fichiers/hooks/fonctionnalités) ?. Conclusion cite React, IA accélération + validation rigoureuse ?. Déductions : pas de pourcentage de commits ni analyse Git, conclusion courte et générique, la stratégie de branchement n'est pas mentionnée."
+Sous-total — rapport,,,40,32.,
+,,,,,
+4. Pénalités,,,,,
+#,Pénalité,,Max,Appliquée,Justification
+P1,Mauvais usage du HTML sémantique : absence ou usage inadéquat d'éléments HTML5 structurants.,,5,0.,"lang='en' sur index.html (app française — WCAG 3.1.1). Labels sans htmlFor/id sur tous les champs de filtres (Statistiques.jsx:137-144, POI.jsx:85-92). Hamburger <button> sans aria-label/aria-expanded/aria-controls, SVG sans aria-hidden (Navbar.jsx:44-54). Tri via onClick sur <th> sans <button> focusable ni aria-sort (DataTable.jsx:16-28). Aucun skip link."
+P2,"Rapport mal rédigé : qualité du français insuffisante (clarté, structure, syntaxe).",,10,,
+P3,"[Parcours avec IA] Code généré accepté tel quel, sans relecture ni adaptation.",,10,,
+P4,[Parcours avec IA] Absence ou non-respect du journal PROMPTS.md.,,10,,
+P5,"[Parcours sans IA] Absence ou non-respect du journal DEMARCHE.md, ou usage d'IA non déclaré.",,10,,
+P7,Soumission non conforme : tag phase1-submission absent ou divergent du SHA déposé.,,15,,
+Sous-total des pénalités appliquées,,,,0.,
+,,,,,
+5. Note finale,,,,,
+Sous-total démonstration,,,,23.,25
+Sous-total code et dépôt Git,,,,31.,35
+Sous-total rapport,,,,32.,40
+Pénalités appliquées,,,,0.,—
+NOTE FINALE PROPOSÉE,,,,86.,/ 100
+,,,,,
+6. Rétroaction à l'équipe,,,,,
+Points forts observés :,,,,,
+"• Architecture modulaire exemplaire pour 2 personnes : useCSV + useSort hooks + DataTable + PageLayout composants — DRY/SOLID appliqués et justifiés dans DEMARCHE et PROMPTS.md.
+• PROMPTS.md de qualité : 7 entrées, entrée 1 rejet quasi-total documenté honnêtement, hallucinations identifiées (colonne CSV inventée, Tailwind excessif), processus itératif (Claude rejeté ? Gemini accepté).
+• Point-in-polygon (Ray-Casting) avec gestion MultiPolygon pour enrichir les compteurs sans modifier le CSV source — solution technique non triviale bien expliquée dans le rapport.
+• Gemini Pro vs Claude Sonnet 4.6 : usage différencié selon la tâche (algorithmique vs Tailwind), avec justification — démarche professionnelle réfléchie.",,,,,
+,,,,,
+Points à améliorer :,,,,,
+"• Corriger lang='fr' dans mtl-velo/index.html et ajouter htmlFor/id sur tous les <label>/<input> (Statistiques.jsx:137-144, POI.jsx:85-92) — deux corrections simples qui règlent 2 violations WCAG majeures.
+• Rendre le tri accessible au clavier : remplacer onClick sur <th> par un <button> à l'intérieur du <th> avec aria-sort='ascending/descending/none' (DataTable.jsx:16-28).
+• Ajouter un état error dans useCSV.js (callback PapaParse `error:`) et un .catch() sur le fetch du GeoJSON dans Statistiques.jsx:57 — l'application reste silencieusement bloquée en chargement sur erreur réseau.
+• Corriger le rapport R2 : la longueur du réseau est calculée via f.properties.LONGUEUR (pas haversine) — la haversine a été supprimée dans le commit 42ba90f selon PROMPTS.md entrée 2.",,,,,
+,,,,,
+Signature du chargé(e) de laboratoire :,,,,,
+,,,,,

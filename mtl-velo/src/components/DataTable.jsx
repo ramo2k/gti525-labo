@@ -8,22 +8,30 @@
  */
 const DataTable = ({ columns, data, requestSort, sortConfig, emptyMessage }) => {
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
+    <div className="overflow-x-auto rounded-lg border border-mtl-texte/20 shadow-sm">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="border-b-2 border-slate-200 bg-slate-50">
+          <tr className="border-b-2 border-mtl-texte/20 bg-mtl-fond">
             {columns.map((col) => (
               <th
                 key={col.key}
                 // Empêche la flèche de tri de sauter sur une nouvelle ligne avec whitespace-nowrap
-                className={`p-3 text-slate-700 whitespace-nowrap transition-colors ${
-                  col.sortable !== false ? "cursor-pointer select-none hover:text-mtl-primaire hover:bg-slate-100" : ""
-                }`}
-                onClick={() => col.sortable !== false && requestSort(col.key)}
+                className="p-3 text-mtl-texte whitespace-nowrap transition-colors"
               >
-                {col.label} 
-                {/* Affiche la flèche dans le bon sens si la colonne est en cours de tri */}
-                {sortConfig?.key === col.key && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                {col.sortable !== false ? (
+                  <button
+                    type="button"
+                    className="flex items-center w-full cursor-pointer select-none hover:text-mtl-primaire focus:outline-none"
+                    onClick={() => requestSort(col.key)}
+                    aria-sort={sortConfig?.key === col.key ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  >
+                    {col.label} 
+                    {/* Affiche la flèche dans le bon sens si la colonne est en cours de tri */}
+                    {sortConfig?.key === col.key && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </button>
+                ) : (
+                  col.label
+                )}
               </th>
             ))}
           </tr>
@@ -34,9 +42,9 @@ const DataTable = ({ columns, data, requestSort, sortConfig, emptyMessage }) => 
             
             // Cas Vrai : on boucle pour créer chaque ligne
             data.map((row, index) => (
-              <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+              <tr key={index} className="border-b border-mtl-texte/10 hover:bg-mtl-fond transition-colors">
                 {columns.map((col) => (
-                  <td key={col.key} className="p-3 text-slate-600">
+                  <td key={col.key} className="p-3 text-mtl-texte/80">
                     {/* Affiche un rendu sur mesure s'il existe, sinon on affiche la donnée brute */}
                     {col.render ? col.render(row) : row[col.key]}
                   </td>
@@ -48,7 +56,7 @@ const DataTable = ({ columns, data, requestSort, sortConfig, emptyMessage }) => 
             
             // Cas Faux : on affiche le message de tableau vide sur toute la largeur
             <tr>
-              <td colSpan={columns.length} className="text-center p-8 text-slate-500 italic bg-slate-50">
+              <td colSpan={columns.length} className="text-center p-8 text-mtl-texte/60 italic bg-mtl-fond">
                 {emptyMessage || "Aucune donnée."}
               </td>
             </tr>

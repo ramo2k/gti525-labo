@@ -21,10 +21,9 @@ export const useSort = (items, config = { key: null, direction: 'asc' }) => {
         const valA = a[sortConfig.key] || '';
         const valB = b[sortConfig.key] || '';
         
-        // Comparaison classique : gère à la fois l'ordre alphabétique et numérique
-        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
+        // Comparaison utilisant localeCompare pour supporter les caractères accentués en français
+        const compareResult = String(valA).localeCompare(String(valB), 'fr', { numeric: true });
+        return sortConfig.direction === 'asc' ? compareResult : -compareResult;
       });
     }
     
