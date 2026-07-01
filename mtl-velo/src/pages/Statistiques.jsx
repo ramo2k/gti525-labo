@@ -40,7 +40,7 @@ const getArrondissement = (lat, lng, geojsonData) => {
 
 // T2.4 : Ouvre OpenStreetMap dans un nouvel onglet avec un marqueur sur les coordonnées
 const openMap = (lat, lng) => {
-  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank');
+  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank', 'noopener,noreferrer');
 };
 
 const Statistiques = () => {
@@ -182,7 +182,9 @@ const Statistiques = () => {
           <span className="block sm:inline">Impossible de récupérer les données des compteurs ou des territoires. Veuillez vérifier votre connexion.</span>
         </div>
       ) : isLoading ? (
-        <p className="text-mtl-texte/70 animate-pulse">Analyse géographique en cours...</p> 
+        <p className="text-mtl-texte/70 animate-pulse" role="status" aria-live="polite">
+          Analyse géographique en cours...
+        </p> 
       ) : (
         <DataTable 
           columns={columns} 

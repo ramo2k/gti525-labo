@@ -1,5 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
+import MapNetwork from '../components/MapNetwork';
+import NetworkFilters from '../components/NetworkFilters';
+import NetworkStatsPanel from '../components/NetworkStatsPanel';
+import { useMapFilters } from '../hooks/useMapFilters';
 
 const ReseauCyclable = () => {
   const [geoJson, setGeoJson] = useState(null);
@@ -17,18 +21,15 @@ const ReseauCyclable = () => {
       .catch(err => { console.error(err); setError(err); setLoading(false); });
   }, []);
 
-  // T2.6 : Calcul des statistiques du réseau
-  const stats = useMemo(() => {
-    if (!geoJson) return null;
-    
-    const features = geoJson.features ?? [];
-    const totalPistes = features.length;
-    
-    // Fait la somme des longueurs (en mètres) puis divise par 1000 pour les kilomètres
-    const totalKm = features.reduce((sum, f) => sum + (f.properties.LONGUEUR || 0), 0) / 1000;
-    
-    return { totalPistes, totalKm: totalKm.toFixed(1) };
-  }, [geoJson]);
+  // Utilisation du hook personnalisé pour la logique métier (T1.5, T1.3)
+  const { 
+    selectedCategories, 
+    toggleCategory, 
+    saison4, 
+    setSaison4, 
+    filterFeature, 
+    stats 
+  } = useMapFilters(geoJson);
 
   return (
     <PageLayout title="Réseau cyclable">
@@ -38,28 +39,29 @@ const ReseauCyclable = () => {
           <span className="block sm:inline">Impossible de récupérer les données du réseau cyclable.</span>
         </div>
       ) : loading ? (
-        <p className="text-mtl-texte/70 animate-pulse">Chargement du réseau cyclable...</p>
+        <p className="text-mtl-texte/70 animate-pulse" role="status" aria-live="polite">
+          Chargement de la carte du réseau cyclable...
+        </p>
       ) : (
-        // Affiche les cartes de statistiques si les données sont prêtes
-        stats && (
-          <div className="flex flex-col md:flex-row gap-6 mb-8">
-            {/* Carte du nombre de segments */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm border border-mtl-texte/20 p-6 text-center hover:shadow-md transition-shadow">
-              <div className="text-4xl mb-2">🚴‍♂️</div>
-              <p className="text-3xl font-extrabold text-mtl-primaire mb-1">{stats.totalPistes.toLocaleString('fr-CA')}</p>
-              <p className="text-sm font-medium text-mtl-texte/70 uppercase tracking-wider">
-                Segments de pistes
-              </p>
-            </div>
-            
-            {/* Carte de la longueur totale */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm border border-mtl-texte/20 p-6 text-center hover:shadow-md transition-shadow">
-              <div className="text-4xl mb-2">📏</div>
-              <p className="text-3xl font-extrabold text-mtl-primaire mb-1">{stats.totalKm} km</p>
-              <p className="text-sm font-medium text-mtl-texte/70 uppercase tracking-wider">
-                Longueur du réseau
-              </p>
-            </div>
+        geoJson && (
+          <div className="flex flex-col">
+            {/* T1.5 : Contrôles de filtrage */}
+            <NetworkFilters 
+              selectedCategories={selectedCategories}
+              toggleCategory={toggleCategory}
+              saison4={saison4}
+              setSaison4={setSaison4}
+            />
+
+            {/* T1.1, T1.2 : Carte interactive Leaflet */}
+            <MapNetwork 
+              geoJsonData={geoJson} 
+              filterFeature={filterFeature} 
+              filterKey={`${selectedCategories.join('-')}-${saison4}`}
+            />
+
+            {/* T1.3 : Panneau récapitulatif dynamique */}
+            <NetworkStatsPanel stats={stats} />
           </div>
         )
       )}

@@ -30,17 +30,17 @@ const Accueil = () => {
       {/* Feature Cards */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
         <Link to="/reseau" className="bg-white p-6 rounded-xl shadow-sm border border-mtl-texte/20 text-center hover:shadow-md hover:border-mtl-primaire transition-all flex flex-col items-center">
-          <div className="w-12 h-12 bg-mtl-fond text-mtl-primaire rounded-full flex items-center justify-center mb-4 text-2xl">🗺️</div>
+          <div className="w-12 h-12 bg-mtl-fond text-mtl-primaire rounded-full flex items-center justify-center mb-4 text-2xl" aria-hidden="true">🗺️</div>
           <h2 className="text-lg font-bold text-mtl-texte mb-2">Réseau cyclable</h2>
           <p className="text-sm text-mtl-texte/80">Visualisez les 9 000+ segments de pistes, filtrez par catégorie et découvrez les pistes populaires.</p>
         </Link>
         <Link to="/statistiques" className="bg-white p-6 rounded-xl shadow-sm border border-mtl-texte/20 text-center hover:shadow-md hover:border-mtl-primaire transition-all flex flex-col items-center">
-          <div className="w-12 h-12 bg-mtl-fond text-mtl-texte rounded-full flex items-center justify-center mb-4 text-2xl">📊</div>
+          <div className="w-12 h-12 bg-mtl-fond text-mtl-texte rounded-full flex items-center justify-center mb-4 text-2xl" aria-hidden="true">📊</div>
           <h2 className="text-lg font-bold text-mtl-texte mb-2">Statistiques</h2>
           <p className="text-sm text-mtl-texte/80">Consultez les données de passage de chaque compteur et analysez les tendances saisonnières.</p>
         </Link>
         <Link to="/assistant" className="bg-white p-6 rounded-xl shadow-sm border border-mtl-texte/20 text-center hover:shadow-md hover:border-mtl-primaire transition-all flex flex-col items-center">
-          <div className="w-12 h-12 bg-mtl-fond text-mtl-texte rounded-full flex items-center justify-center mb-4 text-2xl">💬</div>
+          <div className="w-12 h-12 bg-mtl-fond text-mtl-texte rounded-full flex items-center justify-center mb-4 text-2xl" aria-hidden="true">💬</div>
           <h2 className="text-lg font-bold text-mtl-texte mb-2">Assistant</h2>
           <p className="text-sm text-mtl-texte/80">Posez des questions en français sur le réseau ; l'assistant interroge la base en temps réel.</p>
         </Link>

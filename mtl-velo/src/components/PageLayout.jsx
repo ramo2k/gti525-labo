@@ -20,13 +20,13 @@ const PageLayout = ({ title, itemTotal, filters, children }) => {
 
       {/* T1.4 : La zone principale prend 75% si les filtres sont là, sinon 100% */}
       <section className={`w-full ${filters ? 'md:w-3/4' : ''} bg-white p-5 rounded-lg shadow-sm border border-mtl-texte/20`}>
-        <h2 className="text-2xl font-bold mb-6 text-mtl-primaire">
+        <h1 className="text-2xl font-bold mb-6 text-mtl-primaire">
           {title} 
           {/* Affiche le nombre total entre parenthèses s'il est défini */}
           {itemTotal !== undefined && (
             <span aria-live="polite" className="text-mtl-texte/70 text-lg font-normal ml-2">({itemTotal} résultats)</span>
           )}
-        </h2>
+        </h1>
         {/* Injecte le contenu spécifique à chaque page */}
         {children}
       </section>

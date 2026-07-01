@@ -9,7 +9,7 @@ const PAGE_SIZE = 20;
 
 // T2.4 : Ouvre OpenStreetMap dans un nouvel onglet avec un marqueur sur les coordonnées
 const openMap = (lat, lng) => {
-  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank');
+  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank', 'noopener,noreferrer');
 };
 
 const POI = () => {
@@ -125,6 +125,7 @@ const POI = () => {
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))} 
                   disabled={page === 1} 
+                  aria-label="Page précédente"
                   className="px-4 py-2 text-sm font-medium rounded-md border border-mtl-texte/30 bg-white text-mtl-texte hover:bg-mtl-fond disabled:opacity-50 transition-colors"
                 >
                   Précédent
@@ -132,6 +133,7 @@ const POI = () => {
                 <button 
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
                   disabled={page === totalPages} 
+                  aria-label="Page suivante"
                   className="px-4 py-2 text-sm font-medium rounded-md border border-mtl-texte/30 bg-white text-mtl-texte hover:bg-mtl-fond disabled:opacity-50 transition-colors"
                 >
                   Suivant

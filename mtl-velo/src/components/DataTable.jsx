@@ -27,7 +27,11 @@ const DataTable = ({ columns, data, requestSort, sortConfig, emptyMessage }) => 
                   >
                     {col.label} 
                     {/* Affiche la flèche dans le bon sens si la colonne est en cours de tri */}
-                    {sortConfig?.key === col.key && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                    {sortConfig?.key === col.key && (
+                      <span aria-hidden="true">
+                        {sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}
+                      </span>
+                    )}
                   </button>
                 ) : (
                   col.label
