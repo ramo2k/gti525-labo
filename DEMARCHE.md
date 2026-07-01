@@ -4,7 +4,7 @@
 
 ## Équipe et parcours
 
-- **Équipe** : Omar Khudhair, Christian Junior Djomga
+- **Équipe** : 17 - Membres : Omar Khudhair, Christian Junior Djomga
 - **Parcours déclaré** : **avec IA**
 - **Date de déclaration** : 14 mai 2026
 - **Justification du choix** : On a choisi d'utiliser l'IA pour aller plus vite sur la création de l'interface et pouvoir se concentrer sur la logique du projet. Ça nous permet de pratiquer comment bien utiliser l'IA (faire les bons prompts, vérifier le code) tout en préparant un code propre pour la suite.

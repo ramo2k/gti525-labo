@@ -2,7 +2,7 @@
 
 ## Équipe et parcours
 
-- **Équipe** : 07 - Membres : Omar Khudhair, Christian Junior Djomga
+- **Équipe** : 17 - Membres : Omar Khudhair, Christian Junior Djomga
 - **Parcours déclaré** : avec IA
 - **Outils utilisés ce trimestre** : Gemini Pro, Claude Sonnet 4.6
 
@@ -156,6 +156,27 @@
 - **Accepté** : La base de refactorisation était solide. Les commentaires ajoutés expliquent très bien le rôle des paramètres dans les hooks et les composants réutilisables, ce qui rend le projet professionnel.
 - **Modifié** : J'ai refusé de sacrifier l'expérience utilisateur (UI) au profit d'un code "minimaliste". J'ai donc exigé un compromis pour avoir un beau design tout en gardant un code épuré.
 - **Leçon** : Quand on demande à une IA de "nettoyer", elle peut parfois supprimer des éléments de design essentiels. Il faut être ultra précis et directif (ex: "donne-moi le fichier entier", "ne fais pas de listes numérotées") pour obtenir exactement le résultat voulu sans perdre de temps.
+
+## Entrée 8 - Correctifs finaux de la Phase 1 (Pages manquantes, Thème, Erreurs réseau)
+
+**Auteur** : Omar Khudhair - 2026-06-30 - commit `7b76ace`
+
+**Prompt** (Gemini Pro) :
+
+> Implémente les pages manquantes ("Accueil" et "À propos") en te basant sur la grille de correction et les maquettes fournies dans l'annexe de la phase 1. Assure-toi également de corriger toutes les autres lacunes soulevées par le correcteur.
+>
+> De plus, j'ai remarqué l'utilisation de couleurs génériques de Tailwind (comme bg-slate-800). Utilise strictement les 3 variables de couleurs personnalisées définies dans le fichier index.css pour l'ensemble du projet.
+
+**Sortie** : L'IA a créé les pages manquantes (`Accueil.jsx`, `APropos.jsx`) conformes aux maquettes, ajouté la gestion des erreurs réseau manquantes sur les hooks, et remplacé toutes les couleurs génériques de Tailwind par les variables CSS de notre thème dans l'ensemble des fichiers.
+
+**Modifications apportées** :
+- Intégration directe des correctifs dans `App.jsx`, `Statistiques.jsx`, `POI.jsx`, et `Reseau.jsx`.
+- Vérification que l'assistant n'a pas inclus de mention des fonctionnalités de la Phase 2 et 3 dans la page "À propos" prématurément.
+
+**Justification du jugement critique** :
+- **Accepté** : Le gain de temps pour repasser sur l'ensemble de l'interface et uniformiser les couleurs selon les tokens stricts du fichier CSS était immense. L'IA a très bien compris comment jouer avec les opacités (ex: `text-mtl-texte/70`).
+- **Modifié** : L'IA avait inclus une section sur le backend et des membres fictifs dans la page "À propos". Il a fallu exiger qu'elle utilise nos vrais noms et se limite aux technologies de la Phase 1.
+- **Leçon** : Même lors d'une simple passe de correction de bogues, l'IA peut déborder et anticiper des fonctionnalités futures si on ne restreint pas explicitement son champ d'action au contexte actuel.
 
 ---
 
