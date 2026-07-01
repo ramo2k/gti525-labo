@@ -107,3 +107,38 @@
 **Choix retenu** : **React-Leaflet** avec les cartes de base d'OpenStreetMap.
 
 **Justification** : Pour un projet d'école, utiliser un outil gratuit et open-source fait amplement le travail. React-Leaflet est assez léger et ça fittait super bien avec notre structure de composants. On a juste eu un petit problème quand on essayait de filtrer les pistes : la carte ne se mettait pas à jour. On a dû ajouter une `key` dynamique pour forcer le composant à se recharger. À part ça, c'était de loin l'option la plus rapide à monter avec l'aide de l'IA.
+
+---
+
+## Décision 6 - Choix de la technologie Backend (T4)
+
+**Auteur** : Omar Khudhair - 2026-07-01 - commit `702bda8`
+
+**Problème** : Pour la tâche T4, il fallait choisir comment coder l'application dorsale (le serveur et l'API).
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Python (Flask) | On a déjà le script Python fourni pour la BD, donc c'est familier. | Moins naturel à mixer avec notre code React, ça force à gérer deux langages différents. |
+| Node.js natif | Zéro dépendance externe à installer. | Trop long à coder, on doit tout faire à la main (le routage, lire le JSON, etc.). |
+| Node.js + Express | C'est le standard de l'industrie, le code est super court et propre. | Ajoute une dépendance (Express) dans le projet. |
+
+**Choix retenu** : **Node.js avec Express**.
+
+**Justification** : C'était la recommandation du prof et honnêtement ça fait beaucoup de sens puisqu'on utilise déjà Node.js pour faire tourner React. Avec Express, on a pu coder nos routes d'API en quelques lignes. Pour la BD, on a juste ajouté `sqlite3` et ça s'est connecté tout seul. C'était l'option la plus logique et rapide.
+
+---
+
+## Décision 7 - Outil de test pour l'API (C4)
+
+**Auteur** : Omar Khudhair - 2026-07-01 - commit `702bda8`
+
+**Problème** : Le livrable demande 3 tests exécutables pour prouver que notre API marche bien. 
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Script bash (cURL) | S'exécute directement dans le terminal, pas besoin d'installer de logiciels. | Difficile à lire, syntaxe parfois capricieuse sous Windows (PowerShell). |
+| Postman (Collection JSON) | Très visuel, facile à tester, on peut rajouter des scripts pour valider les codes d'erreur automatiquement. | Le correcteur doit avoir Postman installé pour l'essayer. |
+
+**Choix retenu** : **Postman (Collection JSON)**.
+
+**Justification** : C'est vraiment le meilleur outil pour tester une API. J'ai généré une collection (`MTL_Velo_API.postman_collection.json`) qui inclut 6 tests. En un clic, ça valide que nos routes renvoient bien un code 200 ou 400. C'est beaucoup plus lisible qu'un gros fichier bash rempli de requêtes cURL.

@@ -217,6 +217,25 @@
 
 ---
 
+## Entrée 11 - Génération des tests d'API avec Postman (T5.A.4)
+
+**Auteur** : Omar Khudhair - 2026-07-01 - commit `702bda8`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> Je veux d'abord tester la tâche 4, il y avait des consignes supplémentaires sur les curl et des tests à faire. Donne-moi le plan puis génère une collection Postman avec plusieurs tests valides et invalides pour notre API.
+
+**Sortie** : L'IA a généré un fichier `MTL_Velo_API.postman_collection.json` contenant 6 requêtes, avec des petits scripts intégrés pour valider automatiquement les statuts HTTP (200, 400).
+
+**Modifications apportées** :
+- J'ai pris le fichier tel quel. J'ai juste importé la collection dans mon propre Postman pour vérifier que les tests passaient bien tous au vert (surtout les tests de sécurité avec les mauvaises dates).
+
+**Justification du jugement critique** :
+- **Accepté** : Le fichier généré marchait du premier coup. L'IA a même pensé à ajouter des tests d'erreurs (400) pour vérifier qu'on bloquait bien les mauvaises requêtes sans faire crasher le serveur.
+- **Leçon** : Demander à l'IA de générer directement un fichier Postman au format JSON est beaucoup plus efficace que de s'acharner à écrire des scripts cURL qui vont finir par planter sous Windows.
+
+---
+
 ## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.

@@ -16,11 +16,12 @@ const APropos = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-bold text-mtl-primaire mb-3">Technologies (Phase 1)</h2>
+          <h2 className="text-xl font-bold text-mtl-primaire mb-3">Technologies (Phase 1 & 2)</h2>
           <ul className="list-disc pl-5 space-y-1 text-sm text-mtl-texte/80">
-            <li><strong>Interface</strong> : HTML5, CSS moderne, JavaScript ES2020 (modules ES)</li>
-            <li><strong>Cadriciel et Librairies</strong> : React, Vite, Tailwind CSS v4</li>
-            <li><strong>Traitement de données</strong> : PapaParse</li>
+            <li><strong>Front-end</strong> : React, Vite, Tailwind CSS v4, React-Leaflet (Cartographie)</li>
+            <li><strong>Back-end</strong> : Node.js, Express (API REST)</li>
+            <li><strong>Base de données</strong> : SQLite</li>
+            <li><strong>Tests & Validation</strong> : Postman, WebAIM (Accessibilité WCAG 2.1 AA)</li>
           </ul>
         </section>
 
