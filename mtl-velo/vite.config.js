@@ -7,4 +7,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/gti525': 'http://localhost:8080'
+    }
+  }
 })

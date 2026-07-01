@@ -1,0 +1,283 @@
+{
+	"info": {
+		"_postman_id": "b18b6fc2-3c8c-4f1f-9c03-51b8d2797e88",
+		"name": "MTL Vélo - API GTI525",
+		"description": "Collection de tests automatiques pour l'API Node.js/Express de la tâche T4.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "T4.3 - Réseau Cyclable (Succès)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Le statut HTTP est 200 (Succès)\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Le format est bien du JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test(\"Contient une FeatureCollection GeoJSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.type).to.eql(\"FeatureCollection\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/gti525/v1/pistes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"gti525",
+						"v1",
+						"pistes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "T4.3 - Points d'intérêt (Succès)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Le statut HTTP est 200 (Succès)\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Retourne un tableau de données\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/gti525/v1/pointsdinteret",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"gti525",
+						"v1",
+						"pointsdinteret"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "T4.2 - Liste des compteurs (Succès)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Le statut HTTP est 200 (Succès)\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Le premier compteur a des coordonnées GPS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData[0]).to.have.property('Latitude');",
+							"    pm.expect(jsonData[0]).to.have.property('Longitude');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/gti525/v1/compteurs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"gti525",
+						"v1",
+						"compteurs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "T4.2 - Passages valides (Succès)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Le statut HTTP est 200 (Succès)\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Retourne un tableau avec des dates et des passages (SUM)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    if (jsonData.length > 0) {",
+							"        pm.expect(jsonData[0]).to.have.property('date');",
+							"        pm.expect(jsonData[0]).to.have.property('passages');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/gti525/v1/compteurs/100001753/passages?debut=20220101&fin=20220131",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"gti525",
+						"v1",
+						"compteurs",
+						"100001753",
+						"passages"
+					],
+					"query": [
+						{
+							"key": "debut",
+							"value": "20220101"
+						},
+						{
+							"key": "fin",
+							"value": "20220131"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "T4.4 - Format de date invalide (Erreur 400)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Le statut HTTP est 400 (Bad Request)\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test(\"Ne retourne pas de Stack Trace mais un objet JSON propre\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('erreur');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/gti525/v1/compteurs/100001753/passages?debut=AAAAA&fin=20220131",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"gti525",
+						"v1",
+						"compteurs",
+						"100001753",
+						"passages"
+					],
+					"query": [
+						{
+							"key": "debut",
+							"value": "AAAAA",
+							"description": "Date invalide"
+						},
+						{
+							"key": "fin",
+							"value": "20220131"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "T4.4 - ID Compteur invalide (Erreur 400)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Le statut HTTP est 400 (Bad Request)\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test(\"Ne retourne pas de Stack Trace mais un objet JSON propre\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('erreur');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/gti525/v1/compteurs/ABCD/passages?debut=20220101&fin=20220131",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"gti525",
+						"v1",
+						"compteurs",
+						"ABCD",
+						"passages"
+					],
+					"query": [
+						{
+							"key": "debut",
+							"value": "20220101"
+						},
+						{
+							"key": "fin",
+							"value": "20220131"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

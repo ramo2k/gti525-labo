@@ -87,3 +87,23 @@
 **Choix retenu** : **PapaParse**.
 
 **Justification** : C'est la solution la plus robuste. En créant un Custom Hook (useCSV), on a la possibilité de cacher la logique de PapaParse dans un seul fichier. Sur nos pages, on a juste besoin d'écrire const { data } = useCSV('/data/poi.csv'). Tout cela rend notre code plus simple à lire et à utiliser.
+
+---
+
+## Décision 5 - Intégration de la carte interactive (T1)
+
+**Auteur** : Omar Khudhair - 2026-07-01
+
+**Problème** : Comment afficher notre réseau cyclable (le fichier GeoJSON) sur une carte interactive sans trop alourdir notre application React ?
+
+**Alternatives envisagées** :
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Google Maps API | Très connu, beaucoup de documentation en ligne. | C'est payant (clé d'API requise) et un peu lourd à charger. |
+| Mapbox | Super fluide pour les grosses données géographiques. | Demande de créer un compte développeur, un peu complexe à configurer au début. |
+| React-Leaflet | Gratuit, open-source, s'intègre super bien avec React et c'est en masse suffisant pour afficher notre GeoJSON. | La mise à jour dynamique des données peut bugger si on gère mal le state React. |
+
+**Choix retenu** : **React-Leaflet** avec les cartes de base d'OpenStreetMap.
+
+**Justification** : Pour un projet d'école, utiliser un outil gratuit et open-source fait amplement le travail. React-Leaflet est assez léger et ça fittait super bien avec notre structure de composants. On a juste eu un petit problème quand on essayait de filtrer les pistes : la carte ne se mettait pas à jour. On a dû ajouter une `key` dynamique pour forcer le composant à se recharger. À part ça, c'était de loin l'option la plus rapide à monter avec l'aide de l'IA.

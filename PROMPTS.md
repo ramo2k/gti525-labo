@@ -178,6 +178,43 @@
 - **Modifié** : L'IA avait inclus une section sur le backend et des membres fictifs dans la page "À propos". Il a fallu exiger qu'elle utilise nos vrais noms et se limite aux technologies de la Phase 1.
 - **Leçon** : Même lors d'une simple passe de correction de bogues, l'IA peut déborder et anticiper des fonctionnalités futures si on ne restreint pas explicitement son champ d'action au contexte actuel.
 
+## Entrée 9 - Implémentation de la carte interactive (T1)
+
+**Auteur** : Omar Khudhair - 2026-07-01 - commit `f1257ea`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> Aide-moi à implémenter la carte interactive pour la tâche T1 de mon projet React. Je veux utiliser React-Leaflet avec OpenStreetMap. Il faut que tu crées les filtres pour les types de pistes cyclables et un filtre 4 saisons qui mettent la carte à jour en temps réel. Assure-toi de respecter le principe SOLID : sépare bien la logique de calcul des couleurs dans un fichier à part et utilise un custom hook pour les filtres. N'oublie pas d'ajouter une légende.
+
+**Sortie** : L'IA a généré tous les composants nécessaires (`MapNetwork.jsx`, `NetworkFilters.jsx`, `MapLegendModal.jsx`) ainsi que le hook `useMapFilters.js` pour gérer l'état.
+
+**Modifications apportées** :
+- J'ai dû corriger un bug silencieux d'affichage. L'IA n'avait pas réalisé que `react-leaflet` ne met pas à jour la couche GeoJSON automatiquement quand l'état change. J'ai ajouté un attribut `key` dynamique lié aux filtres pour forcer la mise à jour visuelle.
+
+**Justification du jugement critique** :
+- **Accepté** : Le code était super propre et bien découpé en plusieurs petits composants. La séparation de la logique des couleurs dans un fichier à part respecte bien les bonnes pratiques.
+- **Modifié** : L'interface ne réagissait pas aux clics sur les filtres à cause d'une subtilité de la librairie Leaflet que l'IA avait oubliée.
+- **Leçon** : L'IA peut écrire un code React qui a l'air parfait théoriquement, mais elle oublie souvent les petits bugs ou comportements bizarres des librairies externes. C'est pour ça qu'il faut toujours tester l'interface soi-même.
+
+---
+
+## Entrée 10 - Audit global et correctifs WCAG (Livrable 2)
+
+**Auteur** : Omar Khudhair - 2026-07-01 - commit `87fab3c`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> Faisons un audit global de tout le projet actuel. Réévalue tout le code de façon très critique et objective, agis comme un correcteur sévère qui cherche la moindre faille. Assure-toi que l'application respecte à 100% tous les critères de correction du livrable 2, et mets une attention particulière sur les exigences d'accessibilité (WCAG). Propose-moi les correctifs nécessaires.
+
+**Sortie** : Un plan d'implémentation très détaillé listant 5 erreurs d'accessibilité à corriger dans plusieurs fichiers (manque de balises h1, problème de focus dans la légende, attributs aria manquants).
+
+**Modifications apportées** :
+- J'ai approuvé le plan et appliqué les correctifs suggérés partout dans le code (ex: changer le h2 en h1 dans `PageLayout.jsx`, ajouter `aria-hidden` sur les emojis, et sécuriser les liens `window.open`).
+
+**Justification du jugement critique** :
+- **Accepté** : L'IA a trouvé des petits détails sémantiques que j'avais complètement oublié de vérifier (comme les titres de page pour les lecteurs d'écran). 
+- **Leçon** : Demander à l'IA de prendre le rôle d'un correcteur ultra sévère est une super bonne stratégie pour trouver les petites erreurs d'accessibilité qu'on laisse souvent passer quand on se concentre juste sur le visuel.
+
 ---
 
 ## Hallucinations rencontrées 
