@@ -3,17 +3,20 @@ import { useCSV } from '../hooks/useCSV';
 import { useSort } from '../hooks/useSort';
 import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
+import MapModal from '../components/MapModal';
 
 // T2.5 : Nombre maximum de points d'intérêt à afficher par page
 const PAGE_SIZE = 20;
 
 // T2.4 : Ouvre OpenStreetMap dans un nouvel onglet avec un marqueur sur les coordonnées
-const openMap = (lat, lng) => {
+/*const openMap = (lat, lng) => {
   window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank', 'noopener,noreferrer');
-};
+};*/
+
 
 const POI = () => {
   // T2.1 : Chargement des données CSV via notre hook personnalisé
+  const [carteId, setCarteId] = useState(null);
   const { data, loading, error } = useCSV('/data/poi.csv'); 
   // L'option header: false indique que ce fichier n'a pas de ligne de titre
   const { data: territoiresData } = useCSV('/data/territoires.csv', { header: false }); 
@@ -69,7 +72,7 @@ const POI = () => {
       // T2.4 : Affiche le bouton uniquement si les coordonnées GPS existent
       render: (row) => row.Latitude && row.Longitude ? (
         <button
-          onClick={() => openMap(row.Latitude, row.Longitude)}
+          onClick={() => setCarteId(row.ID)}
           className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-green-800 transition-colors"
           title="Voir sur OpenStreetMap"
         >
@@ -143,6 +146,16 @@ const POI = () => {
           )}
         </>
       )}
+      {carteId && (
+  <MapModal
+    title="Carte des points d'intérêt"
+    points={sortedData
+      .filter(p => p.Latitude && p.Longitude)
+      .map(p => ({ id: p.ID, lat: parseFloat(p.Latitude), lng: parseFloat(p.Longitude), label: p.Nom_parc_lieu }))}
+    highlightId={carteId}
+    onClose={() => setCarteId(null)}
+  />
+)}
     </PageLayout>
   );
 };

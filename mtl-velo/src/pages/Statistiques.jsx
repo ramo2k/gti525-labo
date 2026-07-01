@@ -3,6 +3,8 @@ import { useCSV } from '../hooks/useCSV';
 import { useSort } from '../hooks/useSort';
 import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
+import MapModal from '../components/MapModal';
+import PassagesModal from '../components/PassagesModal';
 
 // T2.3 : Algorithme Ray-Casting pour vérifier si un point GPS est dans un polygone
 const isPointInPolygon = (point, polygon) => {
@@ -39,9 +41,10 @@ const getArrondissement = (lat, lng, geojsonData) => {
 };
 
 // T2.4 : Ouvre OpenStreetMap dans un nouvel onglet avec un marqueur sur les coordonnées
-const openMap = (lat, lng) => {
+/*const openMap = (lat, lng) => {
   window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank', 'noopener,noreferrer');
-};
+};*/
+
 
 const Statistiques = () => {
   // T2.1 : Chargement des compteurs
@@ -53,6 +56,8 @@ const Statistiques = () => {
   const [errorGeoJson, setErrorGeoJson] = useState(null);
   const [search, setSearch] = useState('');
   const [arrondissement, setArrondissement] = useState('');
+  const [carteId, setCarteId] = useState(null);
+  const [compteurPassages, setCompteurPassages] = useState(null);
 
   // Chargement asynchrone des frontières géographiques
   useEffect(() => {
@@ -128,14 +133,29 @@ const Statistiques = () => {
       // T2.4 : Affiche le bouton seulement si on a les coordonnées GPS
       render: (row) => row.Latitude && row.Longitude ? (
         <button
-          onClick={() => openMap(row.Latitude, row.Longitude)}
+          //onClick={() => openMap(row.Latitude, row.Longitude)}
+          onClick={() => setCarteId(row.ID)}
           className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-green-800 transition-colors"
           title="Voir sur OpenStreetMap"
         >
           Carte
         </button>
       ) : <span className="text-mtl-texte/50 text-xs italic">N/A</span>
-    }
+    },
+    {
+  key: '_passages',
+  label: 'Passages',
+  sortable: false,
+  render: (row) => (
+    <button
+      onClick={() => setCompteurPassages(row)}
+      className="px-3 py-1 text-xs font-medium rounded border border-mtl-primaire text-mtl-primaire hover:bg-mtl-primaire hover:text-white transition-colors"
+      title="Voir les passages"
+    >
+      Passages
+    </button>
+  )
+}
   ];
 
   // T1.4 : Menu des filtres
@@ -194,6 +214,23 @@ const Statistiques = () => {
           emptyMessage="Aucun compteur trouvé." 
         />
       )}
+      {carteId && (
+  <MapModal
+    title="Carte des compteurs"
+    points={compteursEnrichis
+      .filter(c => c.Latitude && c.Longitude)
+      .map(c => ({ id: c.ID, lat: parseFloat(c.Latitude), lng: parseFloat(c.Longitude), label: c.Nom }))}
+    highlightId={carteId}
+    onClose={() => setCarteId(null)}
+  />
+)}
+
+{compteurPassages && (
+  <PassagesModal
+    compteur={compteurPassages}
+    onClose={() => setCompteurPassages(null)}
+  />
+)}
     </PageLayout>
   );
 };
