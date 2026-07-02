@@ -6,7 +6,10 @@ import DataTable from '../components/DataTable';
 import MapModal from '../components/MapModal';
 import PassagesModal from '../components/PassagesModal';
 import TerritoiresMap from '../components/TerritoiresMap';
+import Pagination from '../components/Pagination';
 
+
+const PAGE_SIZE = 20;
 // T2.3 : Algorithme Ray-Casting pour vérifier si un point GPS est dans un polygone
 const isPointInPolygon = (point, polygon) => {
   const [x, y] = point;
@@ -59,6 +62,7 @@ const Statistiques = () => {
   const [arrondissement, setArrondissement] = useState('');
   const [carteId, setCarteId] = useState(null);
   const [compteurPassages, setCompteurPassages] = useState(null);
+  const [page, setPage] = useState(1);
 
   // Chargement asynchrone des frontières géographiques
   useEffect(() => {
@@ -108,6 +112,21 @@ const Statistiques = () => {
 
   // Gère le tri des colonnes
   const { items: sortedData, requestSort, sortConfig } = useSort(filteredData);
+
+  // Calcule le nombre de pages et extrait seulement les compteurs de la page actuelle
+const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
+const pagedData = sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+// Revient à la page 1 quand on change un filtre (sinon on peut se retrouver sur une page
+// qui n'existe plus)
+const handleSearchChange = (valeur) => {
+  setSearch(valeur);
+  setPage(1);
+};
+const handleArrondissementChange = (valeur) => {
+  setArrondissement(valeur);
+  setPage(1);
+};
 
   // T2.1 : Définition des colonnes obligatoires pour les compteurs
   const columns = [
@@ -170,7 +189,7 @@ const Statistiques = () => {
           className="w-full border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
           placeholder="Ex: Rachel / Papineau"
           value={search} 
-          onChange={(e) => setSearch(e.target.value)} 
+          onChange={(e) => handleSearchChange(e.target.value)}
         />
       </div>
       
@@ -180,7 +199,7 @@ const Statistiques = () => {
           id="arrondissement-select"
           className="w-full border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
           value={arrondissement} 
-          onChange={(e) => setArrondissement(e.target.value)}
+          onChange={(e) => handleArrondissementChange(e.target.value)}
         >
           <option value="">Tous les arrondissements</option>
           {territoires.map((terr, idx) => (
@@ -209,14 +228,15 @@ const Statistiques = () => {
       ) : (
         <>
     {/* Carte cliquable des arrondissements, synchronisée avec le menu déroulant */}
-    <TerritoiresMap geoJsonData={geoJson} selected={arrondissement} onSelect={setArrondissement} />
+    <TerritoiresMap geoJsonData={geoJson} selected={arrondissement} onSelect={handleArrondissementChange} />
         <DataTable 
           columns={columns} 
-          data={sortedData} 
+          data={pagedData} 
           requestSort={requestSort} 
           sortConfig={sortConfig} 
           emptyMessage="Aucun compteur trouvé." 
         />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
       {carteId && (

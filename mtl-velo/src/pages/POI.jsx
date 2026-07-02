@@ -5,6 +5,7 @@ import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
 import MapModal from '../components/MapModal';
 import TerritoiresMap from '../components/TerritoiresMap';
+import Pagination from '../components/Pagination';
 
 // T2.5 : Nombre maximum de points d'intérêt à afficher par page
 const PAGE_SIZE = 20;
@@ -129,29 +130,7 @@ const POI = () => {
           />
 
           {/* T2.5 : Affiche les boutons de pagination seulement s'il y a plus d'une page */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-mtl-texte/20">
-              <span className="text-sm font-medium text-mtl-texte/80">Page {page} sur {totalPages}</span>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setPage(p => Math.max(1, p - 1))} 
-                  disabled={page === 1} 
-                  aria-label="Page précédente"
-                  className="px-4 py-2 text-sm font-medium rounded-md border border-mtl-texte/30 bg-white text-mtl-texte hover:bg-mtl-fond disabled:opacity-50 transition-colors"
-                >
-                  Précédent
-                </button>
-                <button 
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
-                  disabled={page === totalPages} 
-                  aria-label="Page suivante"
-                  className="px-4 py-2 text-sm font-medium rounded-md border border-mtl-texte/30 bg-white text-mtl-texte hover:bg-mtl-fond disabled:opacity-50 transition-colors"
-                >
-                  Suivant
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
       {carteId && (

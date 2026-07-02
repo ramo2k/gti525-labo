@@ -142,3 +142,37 @@
 **Choix retenu** : **Postman (Collection JSON)**.
 
 **Justification** : C'est vraiment le meilleur outil pour tester une API. J'ai généré une collection (`MTL_Velo_API.postman_collection.json`) qui inclut 6 tests. En un clic, ça valide que nos routes renvoient bien un code 200 ou 400. C'est beaucoup plus lisible qu'un gros fichier bash rempli de requêtes cURL.
+
+---
+
+## Décision 8 - Choix de la librairie graphique (C4)
+
+**Auteur** : Christian Junior Djomga - 2026-07-01 - commit `702bda8`
+
+**Problème** : Pour le bouton « Passages » il fallait qu'on chosisse avec on devait faire le graphique.
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Recharts  | Bonne intégration avec réact | Mnaque de documentation |
+| Chart.js | très populaire et simple à utiliser | intégration un peu plus complexe avec réact(nécessité d'utiliser un objet) |
+
+**Choix retenu** : **Chart.js**.
+
+**Justification** : Vu qu'on ne maitrise pas trop le sujet, on voulait utiliser la librairie graphique la plus simple à utiliser et à faire fonctionner. Chart.js était donc le choix idéal
+
+---
+
+## Décision 7 - Affichage des points sur la carte en modale
+
+**Auteur** : Christian Junior Djomga - 2026-07-01 - commit `702bda8`
+
+**Problème** : Pour les bouton « Carte » il fallait décider la facon dont on devait présenter les points.
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Marker  | Il a une image plus rapprocher d'une carte classique | À tendance à bugger |
+| CircleMarker | Facilite le changement de la couleur ou la taille du point sélectionné et juste besoin de charger du svg.| Moins beau visuellement|
+
+**Choix retenu** : **CircleMarker**.
+
+**Justification** : On voulait choisir la solution la plus simple et si possible éviter les bugs classiques des icones par défaut. Avec CircleMarker, on a juste besoin de changer la couleur selon en fonction du point sélectionner ce qui est suffisant pour nous.
