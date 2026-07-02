@@ -37,7 +37,7 @@ const MapNetwork = ({ geoJsonData, filterFeature, filterKey, territoiresGeoJson,
     <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-md border border-mtl-texte/20">
 
       {/* Nouveau : curseur pour régler l'opacité de l'arrondissement en surbrillance */}
-      <div className="absolute top-4 left-4 z-[400] bg-white p-3 rounded-lg shadow-lg border border-mtl-texte/10 flex items-center gap-2">
+      <div className="absolute bottom-4 left-4 z-[400] bg-white p-3 rounded-lg shadow-lg border border-mtl-texte/10 flex items-center gap-2">
         <label htmlFor="opacity-range" className="text-xs font-medium text-mtl-texte">Opacité</label>
         <input
           id="opacity-range"

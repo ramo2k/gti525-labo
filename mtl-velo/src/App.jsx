@@ -5,6 +5,7 @@ import Statistiques from './pages/Statistiques';
 import POI from './pages/POI';
 import Reseau from './pages/Reseau';
 import APropos from './pages/APropos';
+import Assistant from './pages/Assistant';
 
 // T1.1 : Squelette et navigation
 function App() {
@@ -23,7 +24,7 @@ function App() {
             <Route path="/reseau" element={<Reseau />} />
             <Route path="/statistiques" element={<Statistiques />} />
             <Route path="/poi" element={<POI />} />
-            <Route path="/assistant" element={<h1>Assistant Vélobot</h1>} />
+            <Route path="/assistant" element={<Assistant />} />
             <Route path="/a-propos" element={<APropos />} />
           </Routes>
         </main>

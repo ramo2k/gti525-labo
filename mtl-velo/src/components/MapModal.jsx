@@ -1,8 +1,38 @@
+import { useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// Un point sur la carte : s'il est celui en surbrillance, sa popup s'ouvre automatiquement
+const MarkerPoint = ({ point, isHighlighted }) => {
+  const ref = useRef(null);
+
+  // Dès que ce marqueur devient le point mis en évidence, on ouvre sa popup pour bien le montrer
+  useEffect(() => {
+    if (isHighlighted && ref.current) {
+      ref.current.openPopup();
+    }
+  }, [isHighlighted]);
+
+  return (
+    <CircleMarker
+      ref={ref}
+      center={[point.lat, point.lng]}
+      radius={isHighlighted ? 12 : 6}
+      pathOptions={{
+        color: isHighlighted ? 'red' : '#15803D',
+        // On précise aussi le remplissage (fillColor/fillOpacity), sinon Leaflet le laisse
+        // presque transparent par défaut et le point en surbrillance ne ressort pas assez
+        fillColor: isHighlighted ? 'red' : '#15803D',
+        fillOpacity: isHighlighted ? 0.9 : 0.5,
+      }}
+    >
+      <Popup>{point.label}</Popup>
+    </CircleMarker>
+  );
+};
+
 // Modale simple qui affiche une liste de points sur une carte Leaflet.
-// Le point dont l'id correspond à highlightId est affiché en rouge, plus gros.
+// Le point dont l'id correspond à highlightId est affiché en rouge, plus gros, avec sa popup ouverte.
 const MapModal = ({ points, highlightId, onClose, title }) => {
   // On centre la carte sur le point sélectionné (sinon sur Montréal par défaut)
   const pointSelectionne = points.find(p => p.id === highlightId);
@@ -24,14 +54,7 @@ const MapModal = ({ points, highlightId, onClose, title }) => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {points.map((p) => (
-            <CircleMarker
-              key={p.id}
-              center={[p.lat, p.lng]}
-              radius={p.id === highlightId ? 12 : 6}
-              pathOptions={{ color: p.id === highlightId ? 'red' : '#15803D' }}
-            >
-              <Popup>{p.label}</Popup>
-            </CircleMarker>
+            <MarkerPoint key={p.id} point={p} isHighlighted={p.id === highlightId} />
           ))}
         </MapContainer>
       </div>

@@ -247,11 +247,11 @@
 **Sortie** : Le code nécessaire pour l'implémentation de chaque partie séparé en petits blocs pour le rendre plus lisible.
 
 **Modifications apportées** :
-- Aucune, le code fournit à été conservé comme il était.
+- Aucune, le code fourni à été conservé tel quel.
 
 **Justification du jugement critique** :
 - **Accepté** : En précisant explicitement le type de code que je voulais, l'IA m'a donné un contenu qui répondait à mes attentes.
-- **Leçon** : Contextualiser l'IA et préciser autant que possible la qualité du résultat attendu évite que celui ci ne donne du code imutilement complexe.
+- **Leçon** : Contextualiser l'IA et préciser autant que possible la qualité du résultat attendu évite que celui-ci ne donne du code inutilement complexe.
 
 ---
 
@@ -263,14 +263,14 @@
 
 > aide moi à faire ceci en suivant les instructions de codage précédentes: Sur les vues « Réseau cyclable », « Statistiques » et « Points d'intérêt », l'utilisateur peut sélectionner un arrondissement de deux manières synchronisées: par clic sur le polygone correspondant sur une carte des territoires (alimentée par territoires.geojson) ou via le menu déroulant déjà en place depuis la phase 1. La sélection met le polygone en surbrillance et filtre effectivement les données affichées: pistes situées dans l'arrondissement, compteurs locaux, points d'intérêt locaux.
 
-**Sortie** : L'IA m'a donné le code pour un composant `TerritoiresMap.jsx` pouvant être utilisé sur les 3 pages et l'ajout d'un filtre sur la page réseau cyclable en utilisant un algorithme qui était déja dans `Statistiques.jsx`.
+**Sortie** : L'IA m'a donné le code pour un composant `TerritoiresMap.jsx` pouvant être utilisé sur les 3 pages et l'ajout d'un filtre sur la page réseau cyclable en utilisant un algorithme qui était déjà dans `Statistiques.jsx`.
 
 **Modifications apportées** :
-- Pas de modifications apportés, mais on a demandé à l'IA de justifier son implémentation avant de l'accepter.
+- Pas de modifications apportées, mais on a demandé à l'IA de justifier son implémentation avant de l'accepter.
 
 **Justification du jugement critique** :
-- **Accepté** : Contrairement à la phase 1 ou l'IA avait tendence à halluciné le contenu du jeu de donné à cause d'une mauvaise contextualisation, cette fois il a vraiment vérifier le contenu des données fournies avant de générer le code. Cela nous à permis d'obtenir une solution correcte du premier coup.
-- **Leçon** : Il est toujours important de fournir à l'IA autant de données pertinantes que possible pour l'aider à fournir un meilleur résultat.
+- **Accepté** : Contrairement à la phase 1 où l'IA avait tendance à halluciner le contenu du jeu de donné à cause d'une mauvaise contextualisation, cette fois il a vraiment vérifier le contenu des données fournies avant de générer le code. Cela nous à permis d'obtenir une solution correcte du premier coup.
+- **Leçon** : Il est toujours important de fournir à l'IA autant de données pertinentes que possible pour l'aider à fournir un meilleur résultat.
 
 ---
 
