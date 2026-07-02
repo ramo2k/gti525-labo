@@ -3,7 +3,6 @@ import PageLayout from '../components/PageLayout';
 import MapNetwork from '../components/MapNetwork';
 import NetworkFilters from '../components/NetworkFilters';
 import NetworkStatsPanel from '../components/NetworkStatsPanel';
-import TerritoiresMap from '../components/TerritoiresMap';
 import { useCSV } from '../hooks/useCSV';
 import { useMapFilters } from '../hooks/useMapFilters';
 
@@ -141,10 +140,7 @@ const ReseauCyclable = () => {
       </select>
     </div>
 
-    {/* Nouveau : carte cliquable des arrondissements, synchronisée avec le menu déroulant */}
-    <TerritoiresMap geoJsonData={territoiresGeoJson} selected={arrondissement} onSelect={setArrondissement} />
-
-    {/* T1.5 : Contrôles de filtrage */}
+     {/* T1.5 : Contrôles de filtrage */}
     <NetworkFilters 
       selectedCategories={selectedCategories}
       toggleCategory={toggleCategory}
@@ -152,11 +148,14 @@ const ReseauCyclable = () => {
       setSaison4={setSaison4}
     />
 
-    {/* T1.1, T1.2 : Carte interactive Leaflet */}
+    {/* Une seule carte : réseau cyclable + arrondissements cliquables fusionnés */}
     <MapNetwork 
       geoJsonData={geoJson} 
       filterFeature={filterFeatureFinal} 
       filterKey={`${selectedCategories.join('-')}-${saison4}-${arrondissement}`}
+      territoiresGeoJson={territoiresGeoJson}
+      arrondissement={arrondissement}
+      onSelectArrondissement={setArrondissement}
     />
 
     {/* T1.3 : Panneau récapitulatif dynamique */}

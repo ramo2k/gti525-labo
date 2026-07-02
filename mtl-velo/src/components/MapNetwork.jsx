@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getTrackStyle } from '../utils/mapLogic';
@@ -6,16 +6,50 @@ import MapLegendModal from './MapLegendModal';
 
 /**
  * Composant de carte isolé (SOLID) gérant l'affichage Leaflet (T1.1, T1.2, T1.4).
+ * Affiche à la fois le réseau cyclable ET les polygones d'arrondissement (une seule carte).
  */
-const MapNetwork = ({ geoJsonData, filterFeature, filterKey }) => {
+const MapNetwork = ({ geoJsonData, filterFeature, filterKey, territoiresGeoJson, arrondissement, onSelectArrondissement }) => {
   const [isLegendOpen, setIsLegendOpen] = useState(false);
+  // Opacité du remplissage de l'arrondissement en surbrillance, réglable par l'utilisateur
+  const [zoneOpacity, setZoneOpacity] = useState(0.4);
 
   // Centre de la carte (Montréal)
   const position = [45.5088, -73.5878];
-  
+
+  // Style des polygones d'arrondissement : en rouge/surbrillance si sélectionné
+  const territoireStyle = (feature) => ({
+    color: feature.properties.NOM === arrondissement ? '#B91C1C' : '#15803D',
+    weight: feature.properties.NOM === arrondissement ? 3 : 1,
+    fillColor: feature.properties.NOM === arrondissement ? '#EF4444' : '#15803D',
+    fillOpacity: feature.properties.NOM === arrondissement ? zoneOpacity : 0.05,
+  });
+
+  // Un clic sur un polygone sélectionne (ou désélectionne) l'arrondissement
+  const onEachTerritoire = (feature, layer) => {
+    layer.bindTooltip(feature.properties.NOM);
+    layer.on('click', () => {
+      const nom = feature.properties.NOM;
+      onSelectArrondissement(nom === arrondissement ? '' : nom);
+    });
+  };
+
   return (
     <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-md border border-mtl-texte/20">
-      
+
+      {/* Nouveau : curseur pour régler l'opacité de l'arrondissement en surbrillance */}
+      <div className="absolute top-4 left-4 z-[400] bg-white p-3 rounded-lg shadow-lg border border-mtl-texte/10 flex items-center gap-2">
+        <label htmlFor="opacity-range" className="text-xs font-medium text-mtl-texte">Opacité</label>
+        <input
+          id="opacity-range"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value={zoneOpacity}
+          onChange={(e) => setZoneOpacity(parseFloat(e.target.value))}
+        />
+      </div>
+
       {/* Bouton pour ouvrir la légende flottante par-dessus la carte (T1.4) */}
       <button
         onClick={() => setIsLegendOpen(true)}
@@ -36,8 +70,18 @@ const MapNetwork = ({ geoJsonData, filterFeature, filterKey }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
-        {/* T1.2 : Tracés colorés */}
+
+        {/* Nouveau : polygones des arrondissements (cliquables), dessinés en dessous des pistes */}
+        {territoiresGeoJson && (
+          <GeoJSON
+            key={`territoires-${arrondissement}-${zoneOpacity}`}
+            data={territoiresGeoJson}
+            style={territoireStyle}
+            onEachFeature={onEachTerritoire}
+          />
+        )}
+
+        {/* T1.2 : Tracés colorés du réseau cyclable */}
         {geoJsonData && (
           <GeoJSON 
             key={`geojson-${filterKey}`}

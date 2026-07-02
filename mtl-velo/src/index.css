@@ -9,3 +9,9 @@
   --color-mtl-fond: #F1F5F9;     /* Fond clair réduisant la fatigue visuelle */
   --color-mtl-texte: #0F172A;    /* Texte sombre offrant une excellente lisibilité */
 }
+
+path:focus,
+g:focus,
+path.leaflet-interactive:focus {
+  outline: none;
+}

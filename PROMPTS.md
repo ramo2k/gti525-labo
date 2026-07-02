@@ -236,6 +236,44 @@
 
 ---
 
+## Entrée 12 - Boutons carte et passages (T.2)
+
+**Auteur** : Christian Junior Djomga - 2026-07-01 - commit `9c70349`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> aide moi à faire ceci en suivant les instructions de codage précédentes : Bouton « Carte » dans la vue « Statistiques » : ouvre une modale présentant tous les compteurs sur une carte, le compteur cliqué initialement est mis en évidence. Bouton « Passages » sur chaque ligne de compteur : ouvre une modale avec sélection de période et affiche un graphique du nombre de passages journaliers. Bouton « Carte » dans la vue « Points d'intérêt » : modale présentant les POI actuellement listés, avec mise en évidence du point cliqué. Prend le rôle d'un étudiant, code le plus simple possible, cas de base seulement, donne-moi juste le code à ajouter, je l'exécute moi-même.
+
+**Sortie** : Le code nécessaire pour l'implémentation de chaque partie séparé en petits blocs pour le rendre plus lisible.
+
+**Modifications apportées** :
+- Aucune, le code fournit à été conservé comme il était.
+
+**Justification du jugement critique** :
+- **Accepté** : En précisant explicitement le type de code que je voulais, l'IA m'a donné un contenu qui répondait à mes attentes.
+- **Leçon** : Contextualiser l'IA et préciser autant que possible la qualité du résultat attendu évite que celui ci ne donne du code imutilement complexe.
+
+---
+
+## Entrée 13 - Synchronisation carte-menu déroulant pour l'arrondissement (T.3)
+
+**Auteur** : Christian Junior Djomga - 2026-07-01 - commit `2d889f7`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> aide moi à faire ceci en suivant les instructions de codage précédentes: Sur les vues « Réseau cyclable », « Statistiques » et « Points d'intérêt », l'utilisateur peut sélectionner un arrondissement de deux manières synchronisées: par clic sur le polygone correspondant sur une carte des territoires (alimentée par territoires.geojson) ou via le menu déroulant déjà en place depuis la phase 1. La sélection met le polygone en surbrillance et filtre effectivement les données affichées: pistes situées dans l'arrondissement, compteurs locaux, points d'intérêt locaux.
+
+**Sortie** : L'IA m'a donné le code pour un composant `TerritoiresMap.jsx` pouvant être utilisé sur les 3 pages et l'ajout d'un filtre sur la page réseau cyclable en utilisant un algorithme qui était déja dans `Statistiques.jsx`.
+
+**Modifications apportées** :
+- Pas de modifications apportés, mais on a demandé à l'IA de justifier son implémentation avant de l'accepter.
+
+**Justification du jugement critique** :
+- **Accepté** : Contrairement à la phase 1 ou l'IA avait tendence à halluciné le contenu du jeu de donné à cause d'une mauvaise contextualisation, cette fois il a vraiment vérifier le contenu des données fournies avant de générer le code. Cela nous à permis d'obtenir une solution correcte du premier coup.
+- **Leçon** : Il est toujours important de fournir à l'IA autant de données pertinantes que possible pour l'aider à fournir un meilleur résultat.
+
+---
+
 ## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
