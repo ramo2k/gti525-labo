@@ -11,7 +11,7 @@ const MapModal = ({ points, highlightId, onClose, title }) => {
     : [45.5088, -73.5878];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]" onClick={onClose}>
       <div className="bg-white p-4 rounded-lg w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-bold text-mtl-primaire">{title}</h2>

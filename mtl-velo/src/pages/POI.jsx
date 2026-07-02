@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useCSV } from '../hooks/useCSV';
 import { useSort } from '../hooks/useSort';
 import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
 import MapModal from '../components/MapModal';
+import TerritoiresMap from '../components/TerritoiresMap';
 
 // T2.5 : Nombre maximum de points d'intérêt à afficher par page
 const PAGE_SIZE = 20;
@@ -23,6 +24,12 @@ const POI = () => {
   
   const [arrondissement, setArrondissement] = useState('');
   const [page, setPage] = useState(1); 
+  const [geoJson, setGeoJson] = useState(null);
+  useEffect(() => {
+    fetch('/data/territoires.geojson')
+      .then(res => res.json())
+      .then(data => setGeoJson(data));
+  }, []);
 
   // Extrait la liste des arrondissements et la trie par ordre alphabétique
   const territoires = useMemo(() => {
@@ -49,9 +56,9 @@ const POI = () => {
   const pagedData = sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Ramène l'utilisateur à la première page s'il change le filtre pour éviter les bugs
-  const handleArrondissementChange = (e) => {
-    setArrondissement(e.target.value);
-    setPage(1);
+  const handleArrondissementChange = (valeur) => {
+  setArrondissement(valeur);
+  setPage(1);
   };
 
   // T2.1 : Définition des colonnes obligatoires pour les points d'intérêt
@@ -91,7 +98,7 @@ const POI = () => {
           id="arrondissement-select"
           className="w-full border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white" 
           value={arrondissement} 
-          onChange={handleArrondissementChange}
+          onChange={(e) => handleArrondissementChange(e.target.value)}
         >
           <option value="">Tous les arrondissements</option>
           {territoires.map((terr, idx) => (
@@ -112,6 +119,7 @@ const POI = () => {
         </div>
       ) : loading ? <p className="text-mtl-texte/70 animate-pulse">Chargement des données...</p> : (
         <>
+        <TerritoiresMap geoJsonData={geoJson} selected={arrondissement} onSelect={handleArrondissementChange} />
           <DataTable
             columns={columns}
             data={pagedData}

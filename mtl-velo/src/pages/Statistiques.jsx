@@ -5,6 +5,7 @@ import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
 import MapModal from '../components/MapModal';
 import PassagesModal from '../components/PassagesModal';
+import TerritoiresMap from '../components/TerritoiresMap';
 
 // T2.3 : Algorithme Ray-Casting pour vérifier si un point GPS est dans un polygone
 const isPointInPolygon = (point, polygon) => {
@@ -206,6 +207,9 @@ const Statistiques = () => {
           Analyse géographique en cours...
         </p> 
       ) : (
+        <>
+    {/* Carte cliquable des arrondissements, synchronisée avec le menu déroulant */}
+    <TerritoiresMap geoJsonData={geoJson} selected={arrondissement} onSelect={setArrondissement} />
         <DataTable 
           columns={columns} 
           data={sortedData} 
@@ -213,6 +217,7 @@ const Statistiques = () => {
           sortConfig={sortConfig} 
           emptyMessage="Aucun compteur trouvé." 
         />
+        </>
       )}
       {carteId && (
   <MapModal
