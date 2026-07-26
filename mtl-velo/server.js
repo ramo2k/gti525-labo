@@ -1,11 +1,22 @@
+import 'dotenv/config';
 import express from 'express';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import fs from 'fs';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// T4.4 : secrets lus depuis les variables d'environnement (.env, jamais commité)
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
+if (!JWT_SECRET) {
+    console.error("ERREUR : la variable d'environnement JWT_SECRET est manquante (voir .env.example).");
+    process.exit(1);
+}
 
 const app = express();
 const port = 8080;
@@ -21,6 +32,15 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 app.use(express.json());
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS utilisateurs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        courriel TEXT UNIQUE NOT NULL,
+        mot_de_passe_hache TEXT NOT NULL,
+        date_creation TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+`);
 
 // T4.1 : Servir la frontale (fichiers statiques React générés dans /dist)
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -50,14 +70,93 @@ const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
 // ---------------------------------------------------------------------------
 const requireAuth = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.length <= 7) {
-        return res.status(401).json({ erreur: "Jeton d'authentification manquant ou invalide." });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ erreur: "Jeton d'authentification manquant." });
     }
-    // TODO (T4) : remplacer cette vérification de présence par une vraie
-    // vérification de signature JWT (jsonwebtoken.verify) une fois l'inscription
-    // et la connexion implémentées.
-    next();
+
+    const token = authHeader.slice(7); // retire "Bearer "
+
+    try {
+        // jwt.verify lève une exception si la signature est invalide OU si le jeton est expiré
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.utilisateur = payload; // { id, courriel } - accessible dans les routes protégées
+        next();
+    } catch (err) {
+        return res.status(401).json({ erreur: "Jeton invalide ou expiré." });
+    }
 };
+
+// ---------------------------------------------------------------------------
+// T4.1 / T4.2 : Inscription - hachage du mot de passe avec bcrypt (12 rounds)
+// ---------------------------------------------------------------------------
+app.post('/gti525/v1/auth/inscription', async (req, res) => {
+    const { courriel, mot_de_passe } = req.body;
+
+    if (!courriel || !mot_de_passe) {
+        return res.status(400).json({ erreur: "Les champs 'courriel' et 'mot_de_passe' sont obligatoires." });
+    }
+    if (mot_de_passe.length < 8) {
+        return res.status(400).json({ erreur: "Le mot de passe doit contenir au moins 8 caractères." });
+    }
+
+    try {
+        // T4.2 : 12 rounds de bcrypt (au-dessus du minimum de 10 exigé) - jamais de mot de passe en clair stocké
+        const hache = await bcrypt.hash(mot_de_passe, 12);
+
+        const resultat = await dbRun(
+            'INSERT INTO utilisateurs (courriel, mot_de_passe_hache) VALUES (?, ?)',
+            [courriel, hache]
+        );
+
+        // On ne renvoie jamais le hash du mot de passe dans la réponse HTTP
+        res.status(201).json({ id: resultat.lastID, courriel });
+    } catch (err) {
+        // Code SQLite pour violation de contrainte UNIQUE (courriel déjà utilisé)
+        if (err.code === 'SQLITE_CONSTRAINT') {
+            return res.status(409).json({ erreur: "Ce courriel est déjà associé à un compte." });
+        }
+        res.status(500).json({ erreur: "Erreur lors de l'inscription." });
+    }
+});
+
+// ---------------------------------------------------------------------------
+// T4.1 : Connexion - émission d'un jeton JWT avec durée de vie limitée
+// ---------------------------------------------------------------------------
+app.post('/gti525/v1/auth/connexion', async (req, res) => {
+    const { courriel, mot_de_passe } = req.body;
+
+    if (!courriel || !mot_de_passe) {
+        return res.status(400).json({ erreur: "Les champs 'courriel' et 'mot_de_passe' sont obligatoires." });
+    }
+
+    // Message d'erreur volontairement IDENTIQUE dans les deux cas suivants
+    // (courriel inexistant / mot de passe erroné) pour ne pas révéler si un
+    // courriel donné est déjà enregistré (protection contre l'énumération de comptes)
+    const erreurGenerique = { erreur: "Courriel ou mot de passe invalide." };
+
+    try {
+        const utilisateur = await dbGet('SELECT * FROM utilisateurs WHERE courriel = ?', [courriel]);
+        if (!utilisateur) {
+            return res.status(401).json(erreurGenerique);
+        }
+
+        const motDePasseValide = await bcrypt.compare(mot_de_passe, utilisateur.mot_de_passe_hache);
+        if (!motDePasseValide) {
+            return res.status(401).json(erreurGenerique);
+        }
+
+        // Émission du jeton JWT, signé avec le secret côté serveur, expirant après JWT_EXPIRATION
+        const jeton = jwt.sign(
+            { id: utilisateur.id, courriel: utilisateur.courriel },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRATION }
+        );
+
+        res.json({ jeton, expireDans: JWT_EXPIRATION, utilisateur: { id: utilisateur.id, courriel: utilisateur.courriel } });
+    } catch (err) {
+        res.status(500).json({ erreur: "Erreur lors de la connexion." });
+    }
+});
 
 // ---------------------------------------------------------------------------
 // T1.1 : Auto-documentation de l'API à la racine
@@ -74,7 +173,10 @@ app.get('/gti525/v1/', (req, res) => {
             { methode: "POST", route: "/gti525/v1/pointsdinteret", description: "Crée un point d'intérêt (protégé par jeton)." },
             { methode: "PUT", route: "/gti525/v1/pointsdinteret/:id", description: "Modifie un point d'intérêt (protégé par jeton)." },
             { methode: "DELETE", route: "/gti525/v1/pointsdinteret/:id", description: "Supprime un point d'intérêt (protégé par jeton)." },
-            { methode: "GET", route: "/gti525/v1/pistes", description: "Réseau cyclable en GeoJSON (filtres: arrondissement, categorie, populaireDebut, populaireFin)." }
+            { methode: "GET", route: "/gti525/v1/pistes", description: "Réseau cyclable en GeoJSON (filtres: arrondissement, categorie, populaireDebut, populaireFin)." },
+            { methode: "GET", route: "/gti525/v1/", description: "Liste tous les points de terminaison disponibles." },
+            { methode: "POST", route: "/gti525/v1/auth/inscription", description: "Crée un compte utilisateur (courriel + mot de passe)." },
+            { methode: "POST", route: "/gti525/v1/auth/connexion", description: "Authentifie un utilisateur et retourne un jeton JWT (valide 24h)." }
         ]
     });
 });
