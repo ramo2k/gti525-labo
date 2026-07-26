@@ -6,6 +6,10 @@ import fs from 'fs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import { askVelobot, logSignalement } from './src/utils/velobotService.js';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -466,6 +470,49 @@ app.get('/gti525/v1/pistes', async (req, res) => {
         console.error(err);
         res.status(500).json({ erreur: "Erreur lors de la récupération des pistes cyclables." });
     }
+});
+
+// ---------------------------------------------------------------------------
+// T6 : Fonctionnalité conversationnelle (Vélobot)
+// ---------------------------------------------------------------------------
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+const MAX_REQUESTS = 5;
+
+app.post('/gti525/v1/assistant', async (req, res) => {
+    const ip = req.ip;
+    const now = Date.now();
+    
+    // Rate Limiting (T6.5)
+    if (!rateLimitMap.has(ip)) {
+        rateLimitMap.set(ip, []);
+    }
+    const requests = rateLimitMap.get(ip).filter(time => now - time < RATE_LIMIT_WINDOW_MS);
+    if (requests.length >= MAX_REQUESTS) {
+        return res.status(429).json({ erreur: "Trop de requêtes. Veuillez patienter 1 minute." });
+    }
+    requests.push(now);
+    rateLimitMap.set(ip, requests);
+
+    const { question } = req.body;
+    if (!question || typeof question !== 'string') {
+        return res.status(400).json({ erreur: "La question est requise." });
+    }
+    if (question.length > 1000) { // T6.1 & T6.5 : Limite de longueur
+        return res.status(400).json({ erreur: "La question dépasse la limite de 1000 caractères." });
+    }
+
+    // Appel au service IA
+    const reponse = await askVelobot(question, dbAll, ip);
+    res.json({ reponse });
+});
+
+app.post('/gti525/v1/assistant/signalement', (req, res) => {
+    const { question, reponse } = req.body;
+    if (question && reponse) {
+        logSignalement(question, reponse);
+    }
+    res.status(200).send();
 });
 
 // Toute autre route non-API est gérée par React (pour la navigation côté client)

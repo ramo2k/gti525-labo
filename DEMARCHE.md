@@ -176,3 +176,22 @@
 **Choix retenu** : **CircleMarker**.
 
 **Justification** : On voulait choisir la solution la plus simple et si possible éviter les bugs classiques des icones par défaut. Avec CircleMarker, on a juste besoin de changer la couleur selon en fonction du point sélectionner ce qui est suffisant pour nous.
+
+---
+
+## Décision 8 - Architecture et intégration du Vélobot (T6)
+
+**Auteur** : Omar Khudhair - 2026-07-25
+
+**Problème** : Pour la Tâche 6, on devait ajouter un chatbot (le Vélobot) pour répondre à des questions sur les pistes et les compteurs avec l'IA Gemini. Le gros défi c'était de s'assurer que l'IA donne les vrais chiffres de notre BD SQLite sans inventer de fausses données (critère T6.4).
+
+**Alternatives envisagées** :
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Demander à l'IA de générer du SQL | Super rapide à coder. | Très risqué. L'IA peut se tromper dans le code SQL, inventer des tables ou pire, effacer des données par erreur. |
+| Utiliser les outils JSON (Function Calling) | L'IA ne touche pas à la BD. Elle nous donne juste les paramètres, et c'est notre serveur Node.js qui fait la vraie requête. | Ça prend plus de temps à coder parce qu'il faut définir les outils un par un et bien gérer la discussion avec l'IA. |
+
+**Choix retenu** : L'approche avec les outils JSON (Function Calling) avec la librairie `@google/genai`.
+
+**Justification** : C'est beaucoup plus sécuritaire et précis. En gros, j'ai donné 3 outils à l'IA pour ses requêtes. Quand on pose une question, l'IA choisit le bon outil, notre serveur exécute le vrai code SQL en arrière-plan et on renvoie le résultat brut (JSON) à l'IA pour qu'elle fasse sa phrase. Comme ça, c'est impossible qu'elle invente des chiffres. J'ai aussi mis tout ce code dans `src/utils/velobotService.js` pour garder mon `server.js` propre.

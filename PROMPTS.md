@@ -274,6 +274,28 @@
 
 ---
 
+## Entrée 14 - Création du Vélobot avec Gemini (T6)
+
+**Auteur** : Omar Khudhair - 2026-07-25 - commit `4ebca62`
+
+**Prompt** (Gemini Pro) :
+
+> Je dois faire un bot IA pour mon site (T6). Le bot doit répondre à 3 types de questions (Statistiques, Pistes par arrondissement, Comparaison). Code-moi la logique backend dans un fichier séparé `velobotService.js` avec la librairie `@google/genai`. 
+*(Puis, à cause d'un bogue avec Gemini)* : Erreur Vélobot: ApiError: 404 This model models/gemini-2.5-flash is no longer available... Enlève les balises gras dans les réponses.
+
+**Sortie** : L'IA a écrit tout le fichier `velobotService.js` avec la logique des outils (Function Calling) pour la BD SQLite et le prompt système de base.
+
+**Modifications apportées** :
+- J'ai dû changer le modèle de l'IA pour `gemini-3.5-flash-lite` parce que les anciennes versions boguaient ou bloquaient ma nouvelle clé API.
+- J'ai dû ajouter une phrase stricte dans les instructions de l'IA (`N'utilise AUCUN formatage Markdown, ni gras (**), ni italique`) parce qu'elle mettait tout le temps du texte en gras, ce qui n'était pas beau dans le chat de notre site.
+
+**Justification du jugement critique** :
+- **Accepté** : La stratégie d'utiliser des "outils JSON" pour l'IA marchait super bien. J'ai même fait un script à part pour revérifier les chiffres générés par l'IA et tout était parfait, zéro invention.
+- **Modifié** : J'ai dû corriger la version de l'API parce que le code initial plantait. J'ai aussi dû forcer l'IA à parler en texte brut pour respecter le design du site.
+- **Leçon** : Les modèles de Google changent tellement vite qu'il faut toujours aller lire la vraie documentation au lieu de faire confiance au vieux code de l'IA. Aussi, l'IA a tendance à trop formater ses réponses, il faut être super direct avec elle pour avoir du texte normal.
+
+---
+
 ## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
