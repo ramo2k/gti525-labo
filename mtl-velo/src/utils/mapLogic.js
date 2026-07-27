@@ -8,6 +8,11 @@
  * - Sentier polyvalent : AVANCEMENT_CODE = 'E' et TYPE_VOIE_CODE = 7
  */
 export const getTrackCategory = (properties) => {
+  // Si la catégorie a été précalculée par le backend (Phase 3)
+  if (properties.categorie) {
+    return properties.categorie;
+  }
+
   const revStatus = properties.REV_AVANCEMENT_CODE;
   const status = properties.AVANCEMENT_CODE;
   const typeVoie = properties.TYPE_VOIE_CODE;

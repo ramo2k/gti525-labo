@@ -16,11 +16,14 @@ const APropos = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-bold text-mtl-primaire mb-3">Technologies (Phase 1 & 2)</h2>
+          <h2 className="text-xl font-bold text-mtl-primaire mb-3">Technologies (Phase 1, 2 & 3)</h2>
           <ul className="list-disc pl-5 space-y-1 text-sm text-mtl-texte/80">
-            <li><strong>Front-end</strong> : React, Vite, Tailwind CSS v4, React-Leaflet (Cartographie)</li>
-            <li><strong>Back-end</strong> : Node.js, Express (API REST)</li>
-            <li><strong>Base de données</strong> : SQLite</li>
+            <li><strong>Front-end (T1-T3)</strong> : React, Vite, Tailwind CSS v4, React-Leaflet (Cartographie)</li>
+            <li><strong>Back-end (T4-T5)</strong> : Node.js, Express (API REST), Pagination Serveur</li>
+            <li><strong>Base de données</strong> : SQLite (Importation de CSV massif)</li>
+            <li><strong>Sécurité (T5)</strong> : JWT (JSON Web Tokens), Bcrypt (Hachage OWASP)</li>
+            <li><strong>Intelligence Artificielle (T6)</strong> : Google Gemini (LLM), API Function Calling</li>
+            <li><strong>Protection (T6)</strong> : Rate Limiting (Limitation de débit en mémoire)</li>
             <li><strong>Tests & Validation</strong> : Postman, WebAIM (Accessibilité WCAG 2.1 AA)</li>
           </ul>
         </section>
@@ -29,7 +32,7 @@ const APropos = () => {
           <h2 className="text-xl font-bold text-mtl-primaire mb-3">Contexte pédagogique</h2>
           <p className="text-sm leading-relaxed text-mtl-texte/90">
             Ce projet est réalisé dans le cadre du cours <strong>GTI525 — Technologies des applications web</strong>. 
-            Il illustre l'intégration d'un front-end SPA, d'une API REST sécurisée et d'un assistant conversationnel ancré sur des données réelles.
+            Il illustre l'intégration d'un front-end SPA, d'une API REST sécurisée (authentification, CRUD complet, pagination serveur) et d'un assistant conversationnel (Vélobot) ancré sur des données réelles.
           </p>
         </section>
 

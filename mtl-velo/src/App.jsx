@@ -6,12 +6,15 @@ import POI from './pages/POI';
 import Reseau from './pages/Reseau';
 import APropos from './pages/APropos';
 import Assistant from './pages/Assistant';
+import Auth from './pages/Auth';
+import { AuthProvider } from './contexts/AuthContext';
 
 // T1.1 : Squelette et navigation
 function App() {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
+    <AuthProvider>
+      <Router>
+        <div className="flex flex-col min-h-screen">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white focus:text-black">
           Passer au contenu principal
         </a>
@@ -26,6 +29,7 @@ function App() {
             <Route path="/poi" element={<POI />} />
             <Route path="/assistant" element={<Assistant />} />
             <Route path="/a-propos" element={<APropos />} />
+            <Route path="/auth" element={<Auth />} />
           </Routes>
         </main>
 
@@ -33,7 +37,8 @@ function App() {
           <p>&copy; 2026 MTL Vélo</p>
         </footer>
       </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 

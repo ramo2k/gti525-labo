@@ -1,27 +1,66 @@
 import { useState, useRef, useEffect } from 'react';
 
 const Assistant = () => {
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: 'Bonjour ! Je suis le Vélobot. Je peux répondre à tes questions sur les statistiques de passages, les arrondissements ou comparer des données. Comment puis-je t\'aider ?' }
-  ]);
+  // T6: Durée de vie de la conversation depuis les variables d'environnement (défaut 24h)
+  const expirationMs = parseInt(import.meta.env.VITE_CHATBOT_EXPIRATION_MS) || 86400000;
+
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('velobot_messages');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Vérifier si l'enregistrement n'est pas expiré
+        if (parsed.timestamp && (Date.now() - parsed.timestamp < expirationMs)) {
+          return parsed.data;
+        }
+      } catch (e) {}
+    }
+    return [
+      { role: 'bot', text: 'Bonjour ! Je suis le Vélobot. Je peux répondre à tes questions sur les statistiques de passages, les arrondissements ou comparer des données. Comment puis-je t\'aider ?' }
+    ];
+  });
+  
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [reportedIndexes, setReportedIndexes] = useState(new Set());
+  
+  const [reportedIndexes, setReportedIndexes] = useState(() => {
+    const saved = localStorage.getItem('velobot_reported');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.timestamp && (Date.now() - parsed.timestamp < expirationMs)) {
+          return new Set(parsed.data);
+        }
+      } catch (e) {}
+    }
+    return new Set();
+  });
+  const [notification, setNotification] = useState(null);
   const messagesEndRef = useRef(null);
+
+  const showNotification = (message, isError = false) => {
+    setNotification({ message, isError });
+    setTimeout(() => setNotification(null), 10000);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
+    localStorage.setItem('velobot_messages', JSON.stringify({ data: messages, timestamp: Date.now() }));
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem('velobot_reported', JSON.stringify({ data: [...reportedIndexes], timestamp: Date.now() }));
+  }, [reportedIndexes]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
     if (inputValue.length > 1000) {
-        alert("La question ne doit pas dépasser 1000 caractères.");
+        showNotification("La question ne doit pas dépasser 1000 caractères.", true);
         return;
     }
 
@@ -65,9 +104,9 @@ const Assistant = () => {
       const newReported = new Set(reportedIndexes);
       newReported.add(index);
       setReportedIndexes(newReported);
-      alert("Merci, le signalement a été enregistré.");
+      showNotification("Merci, le signalement a été enregistré.");
     } catch (e) {
-      alert("Erreur lors du signalement.");
+      showNotification("Erreur lors du signalement.", true);
     }
   };
 
@@ -75,6 +114,15 @@ const Assistant = () => {
     <div className="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-sm border border-mtl-texte/20 flex flex-col h-[80vh]">
       <h1 className="text-3xl font-bold text-mtl-primaire mb-2">Assistant Vélobot</h1>
       
+      {/* Notification UI */}
+      {notification && (
+        <div className={`mb-4 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+          notification.isError ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-green-100 text-green-700 border border-green-200'
+        }`}>
+          {notification.message}
+        </div>
+      )}
+
       {/* T6.4 : Honnêteté et Transparence */}
       <div className="bg-blue-50 border border-blue-200 rounded-md px-4 py-3 mb-4 text-sm text-blue-800">
         ℹ️ Les réponses de cet assistant sont générées par une intelligence artificielle à partir des données de la base. Elles peuvent parfois être inexactes.

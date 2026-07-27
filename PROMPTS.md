@@ -276,7 +276,7 @@
 
 ## Entrée 14 - Création du Vélobot avec Gemini (T6)
 
-**Auteur** : Omar Khudhair - 2026-07-25 - commit `4ebca62`
+**Auteur** : Omar Khudhair - 2026-07-25 - commit `8912121`
 
 **Prompt** (Gemini Pro) :
 
@@ -293,6 +293,28 @@
 - **Accepté** : La stratégie d'utiliser des "outils JSON" pour l'IA marchait super bien. J'ai même fait un script à part pour revérifier les chiffres générés par l'IA et tout était parfait, zéro invention.
 - **Modifié** : J'ai dû corriger la version de l'API parce que le code initial plantait. J'ai aussi dû forcer l'IA à parler en texte brut pour respecter le design du site.
 - **Leçon** : Les modèles de Google changent tellement vite qu'il faut toujours aller lire la vraie documentation au lieu de faire confiance au vieux code de l'IA. Aussi, l'IA a tendance à trop formater ses réponses, il faut être super direct avec elle pour avoir du texte normal.
+
+---
+
+## Entrée 15 - Implémentation complète de la Tâche 5 (Auth, Pagination, Carte)
+
+**Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
+
+**Prompt** (Gemini Pro) :
+
+> Aide-moi à faire la tâche 5 au complet. 1) Fais-moi le système de connexion avec JWT (T5.1, T5.2). 2) Ajoute la pagination serveur (LIMIT et OFFSET) pour les compteurs et POI, avec le useEffect dans React (T5.3). 3) Montre-moi comment mettre en surbrillance les pistes populaires sur la carte Leaflet selon l'année en SQL (T5.4).
+
+**Sortie** : L'IA a généré tout le gros morceau backend : le `AuthContext`, les middlewares pour protéger l'API, les grosses requêtes SQL pour la pagination et la popularité, et le code React pour la carte.
+
+**Modifications apportées** :
+- **Authentification** : J'ai dû brancher manuellement le token JWT dans les headers de nos requêtes fetch.
+- **Pagination** : J'ai corrigé un bug gossant où la page restait prise sur l'ancien numéro quand on faisait une nouvelle recherche. J'ai juste ajouté un `setPage(1)`.
+- **Carte (Popularité)** : L'IA a oublié que React-Leaflet ne met pas la carte à jour tout seul quand les couleurs changent. J'ai dû rajouter un `key={mapDataVersion}` pour forcer le refresh.
+
+**Justification du jugement critique** :
+- **Accepté** : L'IA est vraiment forte pour faire des requêtes SQL complexes et monter la base du JWT en Node.js.
+- **Modifié** : J'ai dû patcher plusieurs petits bugs d'interface (le `setPage(1)` et le problème de cache de Leaflet).
+- **Leçon** : L'IA est super bonne pour coder le backend (la tuyauterie), mais elle oublie tout le temps les petits bugs bizarres de React (comme le cache de Leaflet). Il faut vraiment tester l'UI nous-mêmes.
 
 ---
 

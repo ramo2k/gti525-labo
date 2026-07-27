@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import PageLayout from '../components/PageLayout';
 import MapNetwork from '../components/MapNetwork';
 import NetworkFilters from '../components/NetworkFilters';
@@ -6,46 +6,24 @@ import NetworkStatsPanel from '../components/NetworkStatsPanel';
 import { useCSV } from '../hooks/useCSV';
 import { useMapFilters } from '../hooks/useMapFilters';
 
-// Algorithme Ray-Casting (même logique que dans Statistiques.jsx) pour savoir
-// si un point GPS se trouve à l'intérieur d'un polygone d'arrondissement
-const isPointInPolygon = (point, polygon) => {
-  const [x, y] = point;
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i][0], yi = polygon[i][1];
-    const xj = polygon[j][0], yj = polygon[j][1];
-    const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-};
-
-// Retourne le nom de l'arrondissement contenant un point [lng, lat]
-const getArrondissement = (lng, lat, territoiresGeoJson) => {
-  if (!territoiresGeoJson) return "Inconnu";
-  const pt = [lng, lat];
-  for (const feature of territoiresGeoJson.features) {
-    const coords = feature.geometry.coordinates;
-    if (feature.geometry.type === 'Polygon' && isPointInPolygon(pt, coords[0])) {
-      return feature.properties.NOM;
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      for (const poly of coords) {
-        if (isPointInPolygon(pt, poly[0])) return feature.properties.NOM;
-      }
-    }
-  }
-  return "Inconnu";
-};
-
 const ReseauCyclable = () => {
   const [geoJson, setGeoJson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mapDataVersion, setMapDataVersion] = useState(0); // Nouveau state pour forcer Leaflet à se mettre à jour
+  
+  const dateFinRef = useRef(null); // Référence pour l'input de date de fin
 
   // Carte + liste des arrondissements pour le nouveau filtre
   const [territoiresGeoJson, setTerritoiresGeoJson] = useState(null);
   const { data: territoiresData } = useCSV('/data/territoires.csv', { header: false });
   const [arrondissement, setArrondissement] = useState('');
+
+  // Nouveaux états pour le filtre de popularité (T5.4)
+  const [populaireDebut, setPopulaireDebut] = useState('');
+  const [populaireFin, setPopulaireFin] = useState('');
+  const [filterError, setFilterError] = useState(null);
+  const [filterSuccess, setFilterSuccess] = useState(null);
 
   const territoires = useMemo(() => {
     if (!territoiresData) return [];
@@ -58,18 +36,66 @@ const ReseauCyclable = () => {
       .then(data => setTerritoiresGeoJson(data));
   }, []);
 
-  // Chargement asynchrone du fichier GeoJSON
+  // Fonction pour charger le réseau cyclable depuis l'API, avec ou sans filtre de popularité
+  const fetchReseau = async (debut, fin) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = new URL('/gti525/v1/pistes', window.location.origin);
+      if (debut && fin) {
+        url.searchParams.append('populaireDebut', debut);
+        url.searchParams.append('populaireFin', fin);
+      }
+      
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Réseau: " + res.statusText);
+      
+      const data = await res.json();
+      
+      // Si l'API retourne un tableau vide pour les features, on le garde tel quel
+      // pour que la carte se vide (aucun arrondissement populaire trouvé)
+      setGeoJson(data);
+      setMapDataVersion(v => v + 1); // Indique à Leaflet que les données ont changé
+
+      if (debut && fin) {
+        setFilterSuccess(`Résultats mis à jour pour la période du ${debut} au ${fin}.`);
+      } else {
+        setFilterSuccess(null); // Pas de message de succès quand on réinitialise
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Chargement initial unique (sans filtres de popularité)
   useEffect(() => {
-    fetch('/data/reseau_cyclable.geojson')
-      .then(res => {
-        if (!res.ok) throw new Error("Réseau: " + res.statusText);
-        return res.json();
-      })
-      .then(data => { setGeoJson(data); setLoading(false); })
-      .catch(err => { console.error(err); setError(err); setLoading(false); });
+    fetchReseau('', '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Utilisation du hook personnalisé pour la logique métier (T1.5, T1.3)
+  const handleFilterPopularity = (e) => {
+    e.preventDefault();
+    setFilterError(null);
+    setFilterSuccess(null);
+    if (!populaireDebut || !populaireFin) {
+      setFilterError("Veuillez sélectionner une date de début ET une date de fin pour filtrer.");
+      return;
+    }
+    fetchReseau(populaireDebut, populaireFin);
+  };
+
+  const handleResetPopularity = () => {
+    setFilterError(null);
+    setFilterSuccess(null);
+    setPopulaireDebut('');
+    setPopulaireFin('');
+    fetchReseau('', ''); 
+  };
+
+  // Utilisation du hook personnalisé pour la logique métier des catégories
   const { 
     selectedCategories, 
     toggleCategory, 
@@ -78,16 +104,12 @@ const ReseauCyclable = () => {
     filterFeature 
   } = useMapFilters(geoJson);
 
-  // Combine le filtre existant (catégorie/saison) avec le nouveau filtre par arrondissement.
-  // On teste le premier point du tracé (une piste entière est dans un seul arrondissement en général).
   const filterFeatureFinal = (feature) => {
     if (!filterFeature(feature)) return false;
     if (!arrondissement) return true;
-    const [lng, lat] = feature.geometry.coordinates[0];
-    return getArrondissement(lng, lat, territoiresGeoJson) === arrondissement;
+    return feature.properties.arrondissement === arrondissement;
   };
 
-  // Statistiques recalculées à partir du filtre final (incluant l'arrondissement)
   const stats = useMemo(() => {
     if (!geoJson) return { totalSegments: 0, totalLengthKm: 0 };
     let totalLengthMeters = 0;
@@ -95,7 +117,7 @@ const ReseauCyclable = () => {
     geoJson.features.forEach((f) => {
       if (filterFeatureFinal(f)) {
         totalSegments++;
-        totalLengthMeters += (f.properties.LONGUEUR || 0);
+        totalLengthMeters += (f.properties.longueur || 0); // L'API renvoie des minuscules pour les props
       }
     });
     return {
@@ -105,63 +127,128 @@ const ReseauCyclable = () => {
         maximumFractionDigits: 1
       })
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoJson, filterFeature, arrondissement, territoiresGeoJson]);
+  }, [geoJson, filterFeature, arrondissement]);
 
   return (
     <PageLayout title="Réseau cyclable">
       {error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Erreur de chargement ! </strong>
-          <span className="block sm:inline">Impossible de récupérer les données du réseau cyclable.</span>
+          <span className="block sm:inline">Impossible de récupérer les données du réseau cyclable via l'API.</span>
         </div>
-      ) : loading ? (
-        <p className="text-mtl-texte/70 animate-pulse" role="status" aria-live="polite">
-          Chargement de la carte du réseau cyclable...
-        </p>
       ) : (
-        geoJson && (
-  <div className="flex flex-col">
-    {/* Nouveau : menu déroulant pour filtrer par arrondissement */}
-    <div className="bg-white rounded-xl shadow-sm border border-mtl-texte/20 p-6 mb-6">
-      <label htmlFor="arrondissement-select" className="text-sm font-medium text-mtl-texte block mb-2">
-        Arrondissement
-      </label>
-      <select
-        id="arrondissement-select"
-        className="w-full md:w-1/3 border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white"
-        value={arrondissement}
-        onChange={(e) => setArrondissement(e.target.value)}
-      >
-        <option value="">Tous les arrondissements</option>
-        {territoires.map((terr, idx) => (
-          <option key={idx} value={terr}>{terr}</option>
-        ))}
-      </select>
-    </div>
+        <div className="flex flex-col">
+          {/* Menu déroulant pour filtrer par arrondissement */}
+          <div className="bg-white rounded-xl shadow-sm border border-mtl-texte/20 p-6 mb-6">
+            <h3 className="font-bold text-mtl-primaire mb-4">Filtrage Géographique</h3>
+            <label htmlFor="arrondissement-select" className="text-sm font-medium text-mtl-texte block mb-2">
+              Arrondissement
+            </label>
+            <select
+              id="arrondissement-select"
+              className="w-full md:w-1/3 border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white"
+              value={arrondissement}
+              onChange={(e) => setArrondissement(e.target.value)}
+            >
+              <option value="">Tous les arrondissements</option>
+              {territoires.map((terr, idx) => (
+                <option key={idx} value={terr}>{terr}</option>
+              ))}
+            </select>
+          </div>
 
-     {/* T1.5 : Contrôles de filtrage */}
-    <NetworkFilters 
-      selectedCategories={selectedCategories}
-      toggleCategory={toggleCategory}
-      saison4={saison4}
-      setSaison4={setSaison4}
-    />
+          {/* T5.4 : Filtre de popularité par date */}
+          <div className="bg-white rounded-xl shadow-sm border border-mtl-texte/20 p-6 mb-6">
+            <h3 className="font-bold text-mtl-primaire mb-4">Top 3 des arrondissements populaires</h3>
+            <p className="text-sm text-mtl-texte/80 mb-4">
+              Sélectionnez une plage de dates pour n'afficher que les pistes cyclables des 3 arrondissements les plus achalandés (selon la moyenne de passages par compteur).
+            </p>
 
-    {/* Une seule carte : réseau cyclable + arrondissements cliquables fusionnés */}
-    <MapNetwork 
-      geoJsonData={geoJson} 
-      filterFeature={filterFeatureFinal} 
-      filterKey={`${selectedCategories.join('-')}-${saison4}-${arrondissement}`}
-      territoiresGeoJson={territoiresGeoJson}
-      arrondissement={arrondissement}
-      onSelectArrondissement={setArrondissement}
-    />
+            {filterError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm font-medium">
+                ❌ {filterError}
+              </div>
+            )}
+            {filterSuccess && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded text-sm font-medium transition-all">
+                ✅ {filterSuccess}
+              </div>
+            )}
 
-    {/* T1.3 : Panneau récapitulatif dynamique */}
-    <NetworkStatsPanel stats={stats} />
-  </div>
-)
+            <form onSubmit={handleFilterPopularity} className="flex flex-wrap items-end gap-4">
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-mtl-texte mb-1">Date de début</label>
+                <input
+                  type="date"
+                  value={populaireDebut}
+                  onChange={(e) => {
+                    setPopulaireDebut(e.target.value);
+                    if (e.target.value && dateFinRef.current) {
+                      try {
+                        // Ouvre automatiquement le calendrier suivant (supporté sur navigateurs récents)
+                        setTimeout(() => dateFinRef.current.showPicker(), 50);
+                      } catch (err) {
+                        console.warn("showPicker non supporté par ce navigateur");
+                      }
+                    }
+                  }}
+                  className="border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-mtl-texte mb-1">Date de fin</label>
+                <input
+                  type="date"
+                  ref={dateFinRef}
+                  value={populaireFin}
+                  onChange={(e) => setPopulaireFin(e.target.value)}
+                  className="border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white"
+                />
+              </div>
+              <div className="flex gap-2 mt-2 md:mt-0">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`px-4 py-2 rounded text-white font-medium ${loading ? 'bg-mtl-primaire/50' : 'bg-mtl-primaire hover:bg-mtl-survol'} transition-colors`}
+                >
+                  {loading ? 'Chargement...' : 'Filtrer les pistes'}
+                </button>
+                {(populaireDebut || populaireFin) && (
+                  <button
+                    type="button"
+                    onClick={handleResetPopularity}
+                    className="px-4 py-2 rounded bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors font-medium"
+                  >
+                    Réinitialiser
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+
+          <NetworkFilters 
+            selectedCategories={selectedCategories}
+            toggleCategory={toggleCategory}
+            saison4={saison4}
+            setSaison4={setSaison4}
+          />
+
+          {loading && !geoJson ? (
+            <p className="text-mtl-texte/70 animate-pulse mt-4">Chargement de la carte...</p>
+          ) : geoJson ? (
+            <>
+              <MapNetwork 
+                geoJsonData={geoJson} 
+                filterFeature={filterFeatureFinal} 
+                filterKey={`${selectedCategories.join('-')}-${saison4}-${arrondissement}-${mapDataVersion}`}
+                territoiresGeoJson={territoiresGeoJson}
+                arrondissement={arrondissement}
+                onSelectArrondissement={setArrondissement}
+              />
+              <NetworkStatsPanel stats={stats} />
+            </>
+          ) : null}
+        </div>
       )}
     </PageLayout>
   );

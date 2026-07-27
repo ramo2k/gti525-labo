@@ -102,6 +102,15 @@ app.post('/gti525/v1/auth/inscription', async (req, res) => {
     if (mot_de_passe.length < 8) {
         return res.status(400).json({ erreur: "Le mot de passe doit contenir au moins 8 caractères." });
     }
+    if (!/[A-Z]/.test(mot_de_passe)) {
+        return res.status(400).json({ erreur: "Le mot de passe doit contenir au moins une majuscule." });
+    }
+    if (!/[0-9]/.test(mot_de_passe)) {
+        return res.status(400).json({ erreur: "Le mot de passe doit contenir au moins un chiffre." });
+    }
+    if (!/[^A-Za-z0-9]/.test(mot_de_passe)) {
+        return res.status(400).json({ erreur: "Le mot de passe doit contenir au moins un caractère spécial." });
+    }
 
     try {
         // T4.2 : 12 rounds de bcrypt (au-dessus du minimum de 10 exigé) - jamais de mot de passe en clair stocké

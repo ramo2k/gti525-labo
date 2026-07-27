@@ -1,6 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useCSV } from '../hooks/useCSV';
-import { useSort } from '../hooks/useSort';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
 import MapModal from '../components/MapModal';
@@ -8,63 +6,32 @@ import PassagesModal from '../components/PassagesModal';
 import TerritoiresMap from '../components/TerritoiresMap';
 import Pagination from '../components/Pagination';
 
-
 const PAGE_SIZE = 20;
-// T2.3 : Algorithme Ray-Casting pour vérifier si un point GPS est dans un polygone
-const isPointInPolygon = (point, polygon) => {
-  const [x, y] = point;
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i][0], yi = polygon[i][1];
-    const xj = polygon[j][0], yj = polygon[j][1];
-    const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-};
-
-// T2.3 : Croise les coordonnées avec le fichier GeoJSON pour déduire l'arrondissement
-const getArrondissement = (lat, lng, geojsonData) => {
-  if (!geojsonData || !lat || !lng) return "Inconnu";
-  const pt = [parseFloat(lng), parseFloat(lat)];
-
-  for (const feature of geojsonData.features) {
-    const geomType = feature.geometry.type;
-    const coords = feature.geometry.coordinates;
-
-    // Gère les polygones simples et les multipolygones selon le format GeoJSON
-    if (geomType === 'Polygon' && isPointInPolygon(pt, coords[0])) {
-      return feature.properties.NOM;
-    } else if (geomType === 'MultiPolygon') {
-      for (const poly of coords) {
-        if (isPointInPolygon(pt, poly[0])) return feature.properties.NOM;
-      }
-    }
-  }
-  return "Inconnu";
-};
-
-// T2.4 : Ouvre OpenStreetMap dans un nouvel onglet avec un marqueur sur les coordonnées
-/*const openMap = (lat, lng) => {
-  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=17`, '_blank', 'noopener,noreferrer');
-};*/
-
 
 const Statistiques = () => {
-  // T2.1 : Chargement des compteurs
-  const { data: compteursData, loading: loadingCSV, error: errorCSV } = useCSV('/data/compteurs.csv');
-  // L'option header: false lit le fichier même sans ligne de titre
-  const { data: territoiresData } = useCSV('/data/territoires.csv', { header: false }); 
-  
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [geoJson, setGeoJson] = useState(null);
-  const [errorGeoJson, setErrorGeoJson] = useState(null);
   const [search, setSearch] = useState('');
   const [arrondissement, setArrondissement] = useState('');
   const [carteId, setCarteId] = useState(null);
   const [compteurPassages, setCompteurPassages] = useState(null);
   const [page, setPage] = useState(1);
 
-  // Chargement asynchrone des frontières géographiques
+  // Liste fixe des territoires ou via un fetch rapide (ici codé en dur pour simplifier comme dans POI)
+  const territoires = useMemo(() => [
+    "Ahuntsic-Cartierville", "Anjou", "Côte-des-Neiges-Notre-Dame-de-Grâce",
+    "Lachine", "LaSalle", "Le Plateau-Mont-Royal", "Le Sud-Ouest",
+    "L'Île-Bizard-Sainte-Geneviève", "Mercier-Hochelaga-Maisonneuve",
+    "Montréal-Nord", "Outremont", "Pierrefonds-Roxboro",
+    "Rivière-des-Prairies-Pointe-aux-Trembles", "Rosemont-La Petite-Patrie",
+    "Saint-Laurent", "Saint-Léonard", "Verdun", "Ville-Marie", "Villeray-Saint-Michel-Parc-Extension"
+  ], []);
+
+  // Chargement asynchrone des frontières géographiques (pour la carte cliquable)
   useEffect(() => {
     fetch('/data/territoires.geojson')
       .then(response => {
@@ -74,68 +41,59 @@ const Statistiques = () => {
       .then(data => setGeoJson(data))
       .catch(err => {
         console.error("Erreur GeoJSON", err);
-        setErrorGeoJson(err);
       });
   }, []);
 
-  // Liste des arrondissements pour le menu déroulant
-  const territoires = useMemo(() => {
-    if (!territoiresData) return [];
-    return territoiresData.map(row => row[0]).sort();
-  }, [territoiresData]);
+  const fetchCompteurs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = new URL('/gti525/v1/compteurs', window.location.origin);
+      url.searchParams.append('page', page);
+      url.searchParams.append('limite', PAGE_SIZE);
+      if (search) {
+        url.searchParams.append('nom', search);
+      }
+      if (arrondissement) {
+        url.searchParams.append('arrondissement', arrondissement);
+      }
 
-  // Ajoute virtuellement l'arrondissement calculé à chaque compteur
-  const compteursEnrichis = useMemo(() => {
-    if (!compteursData.length || !geoJson) return compteursData;
-    
-    return compteursData.map(compteur => ({
-      ...compteur,
-      Arrondissement: getArrondissement(compteur.Latitude, compteur.Longitude, geoJson)
-    }));
-  }, [compteursData, geoJson]);
-
-  // Applique la recherche textuelle et le filtre géographique
-  const filteredData = useMemo(() => {
-    let result = compteursEnrichis;
-    
-    // T2.2 : Filtre sur le nom
-    if (search) {
-      result = result.filter(item => item.Nom?.toLowerCase().includes(search.toLowerCase()));
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Erreur réseau');
+      
+      const json = await res.json();
+      setData(json.donnees || []);
+      setTotal(json.total || 0);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
     }
-    
-    // T2.3 : Filtre sur l'arrondissement
-    if (arrondissement) {
-      result = result.filter(item => item.Arrondissement === arrondissement);
-    }
-    return result;
-  }, [compteursEnrichis, search, arrondissement]);
+  }, [page, search, arrondissement]);
 
-  // Gère le tri des colonnes
-  const { items: sortedData, requestSort, sortConfig } = useSort(filteredData);
+  useEffect(() => {
+    fetchCompteurs();
+  }, [fetchCompteurs]);
 
-  // Calcule le nombre de pages et extrait seulement les compteurs de la page actuelle
-const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
-const pagedData = sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
-// Revient à la page 1 quand on change un filtre (sinon on peut se retrouver sur une page
-// qui n'existe plus)
-const handleSearchChange = (valeur) => {
-  setSearch(valeur);
-  setPage(1);
-};
-const handleArrondissementChange = (valeur) => {
-  setArrondissement(valeur);
-  setPage(1);
-};
+  const handleSearchChange = (valeur) => {
+    setSearch(valeur);
+    setPage(1);
+  };
 
-  // T2.1 : Définition des colonnes obligatoires pour les compteurs
+  const handleArrondissementChange = (valeur) => {
+    setArrondissement(valeur);
+    setPage(1);
+  };
+
   const columns = [
-    { key: 'ID', label: 'ID' },
-    { key: 'Nom', label: 'Nom' },
+    { key: 'ID', label: 'ID', sortable: false },
+    { key: 'Nom', label: 'Nom', sortable: false },
     { 
       key: 'Statut', 
       label: 'Statut', 
-      // Affiche le statut avec un badge parfaitement centré
+      sortable: false,
       render: (row) => (
         <span className={`block w-fit mx-auto px-3 py-1 text-center text-xs rounded-full font-bold ${
           row.Statut === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
@@ -144,16 +102,14 @@ const handleArrondissementChange = (valeur) => {
         </span>
       ) 
     },
-    { key: 'Annee_implante', label: "Année" },
-    { key: 'Arrondissement', label: "Arrondissement" },
+    { key: 'Annee_implante', label: "Année", sortable: false },
+    { key: 'Arrondissement', label: "Arrondissement", sortable: false },
     {
       key: '_carte',
       label: 'Carte',
       sortable: false,
-      // T2.4 : Affiche le bouton seulement si on a les coordonnées GPS
       render: (row) => row.Latitude && row.Longitude ? (
         <button
-          //onClick={() => openMap(row.Latitude, row.Longitude)}
           onClick={() => setCarteId(row.ID)}
           className="px-3 py-1 text-xs font-medium rounded bg-mtl-primaire text-white hover:bg-green-800 transition-colors"
           title="Voir sur OpenStreetMap"
@@ -163,22 +119,21 @@ const handleArrondissementChange = (valeur) => {
       ) : <span className="text-mtl-texte/50 text-xs italic">N/A</span>
     },
     {
-  key: '_passages',
-  label: 'Passages',
-  sortable: false,
-  render: (row) => (
-    <button
-      onClick={() => setCompteurPassages(row)}
-      className="px-3 py-1 text-xs font-medium rounded border border-mtl-primaire text-mtl-primaire hover:bg-mtl-primaire hover:text-white transition-colors"
-      title="Voir les passages"
-    >
-      Passages
-    </button>
-  )
-}
+      key: '_passages',
+      label: 'Passages',
+      sortable: false,
+      render: (row) => (
+        <button
+          onClick={() => setCompteurPassages(row)}
+          className="px-3 py-1 text-xs font-medium rounded border border-mtl-primaire text-mtl-primaire hover:bg-mtl-primaire hover:text-white transition-colors"
+          title="Voir les passages"
+        >
+          Passages
+        </button>
+      )
+    }
   ];
 
-  // T1.4 : Menu des filtres
   const filters = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
@@ -210,52 +165,52 @@ const handleArrondissementChange = (valeur) => {
     </div>
   );
 
-  // On attend que les deux sources de données soient prêtes (ou qu'une erreur survienne)
-  const isLoading = loadingCSV || (!geoJson && !errorGeoJson);
-  const hasError = errorCSV || errorGeoJson;
-
   return (
-    <PageLayout title="Compteurs vélo" itemTotal={sortedData.length} filters={filters}>
-      {hasError ? (
+    <PageLayout title="Compteurs vélo" itemTotal={total} filters={filters}>
+      {error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Erreur de chargement ! </strong>
-          <span className="block sm:inline">Impossible de récupérer les données des compteurs ou des territoires. Veuillez vérifier votre connexion.</span>
+          <span className="block sm:inline">Impossible de récupérer les données des compteurs via l'API.</span>
         </div>
-      ) : isLoading ? (
+      ) : loading ? (
         <p className="text-mtl-texte/70 animate-pulse" role="status" aria-live="polite">
-          Analyse géographique en cours...
+          Chargement des données de compteurs via API...
         </p> 
       ) : (
         <>
-    {/* Carte cliquable des arrondissements, synchronisée avec le menu déroulant */}
-    <TerritoiresMap geoJsonData={geoJson} selected={arrondissement} onSelect={handleArrondissementChange} />
-        <DataTable 
-          columns={columns} 
-          data={pagedData} 
-          requestSort={requestSort} 
-          sortConfig={sortConfig} 
-          emptyMessage="Aucun compteur trouvé." 
-        />
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <TerritoiresMap geoJsonData={geoJson} selected={arrondissement} onSelect={handleArrondissementChange} />
+          
+          <DataTable 
+            columns={columns} 
+            data={data} 
+            requestSort={() => {}} 
+            sortConfig={null} 
+            emptyMessage="Aucun compteur trouvé." 
+          />
+          
+          {totalPages > 1 && (
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          )}
         </>
       )}
-      {carteId && (
-  <MapModal
-    title="Carte des compteurs"
-    points={compteursEnrichis
-      .filter(c => c.Latitude && c.Longitude)
-      .map(c => ({ id: c.ID, lat: parseFloat(c.Latitude), lng: parseFloat(c.Longitude), label: c.Nom }))}
-    highlightId={carteId}
-    onClose={() => setCarteId(null)}
-  />
-)}
 
-{compteurPassages && (
-  <PassagesModal
-    compteur={compteurPassages}
-    onClose={() => setCompteurPassages(null)}
-  />
-)}
+      {carteId && (
+        <MapModal
+          title="Carte des compteurs"
+          points={data
+            .filter(c => c.ID === carteId)
+            .map(c => ({ id: c.ID, lat: parseFloat(c.Latitude), lng: parseFloat(c.Longitude), label: c.Nom }))}
+          highlightId={carteId}
+          onClose={() => setCarteId(null)}
+        />
+      )}
+
+      {compteurPassages && (
+        <PassagesModal
+          compteur={compteurPassages}
+          onClose={() => setCompteurPassages(null)}
+        />
+      )}
     </PageLayout>
   );
 };

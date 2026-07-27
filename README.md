@@ -16,47 +16,58 @@ Ouvrez un terminal et placez-vous dans le dossier principal du projet (`mtl-velo
 cd mtl-velo
 ```
 
-### 2. Création de la base de données (Obligatoire)
+### 2. Configuration de l'environnement (.env)
+
+L'application a besoin de clés secrètes pour fonctionner (ex: JWT).
+Copiez le fichier d'exemple pour créer votre propre fichier de configuration :
+
+- Sur Windows : `copy .env.example .env`
+- Sur Mac/Linux : `cp .env.example .env`
+
+Ouvrez le nouveau fichier `.env` généré et assurez-vous de remplir les valeurs demandées (notamment `JWT_SECRET`).
+
+### 3. Création de la base de données (Obligatoire)
 
 Les données des compteurs sont trop grosses pour être mises sur GitHub. Il faut donc générer la base de données SQLite sur votre ordinateur avant de lancer le serveur.
 
-Depuis le dossier `mtl-velo`, exécutez le script Python qui va lire les fichiers CSV et créer le fichier de base de données :
+Exécutez le script Python qui va lire les fichiers CSV et créer le fichier de base de données :
 
 ```bash
 python public/data/import_sqlite.py
 ```
 *(Le script va prendre quelques secondes pour insérer les données et créer le fichier `comptage_velo.db` dans le dossier `public/data/`)*
 
-### 3. Installer les dépendances Node
+### 4. Installer les dépendances Node
 
-Toujours dans le dossier `mtl-velo`, installez les paquets requis (Express, SQLite3, React, etc.) :
+Installez les paquets requis (Express, SQLite3, React, etc.) :
 
 ```bash
 npm install
 ```
 
-### 4. Compiler l'interface web (React)
+### 5. Compiler l'interface web (React)
 
-Notre serveur Express (Backend) est configuré pour afficher la version "finale" de l'interface React. Il faut donc la compiler (la builder) dans un dossier `/dist` :
+Notre serveur Express (Backend) est configuré pour afficher la version "finale" de l'interface React. Il faut donc la compiler dans un dossier `/dist` :
 
 ```bash
 npm run build
 ```
 
-### 5. Lancer le serveur web et l'API (Tâche T4)
+### 6. Lancer le serveur web et l'API
 
-Une fois la base de données créée et le front-end compilé, vous pouvez démarrer le serveur :
+Une fois la base de données créée, l'environnement configuré et le front-end compilé, vous pouvez démarrer le serveur :
 
 ```bash
 npm start
 ```
+*(Alternative pour le développement Backend : `node server.js`)*
 
 Le serveur Node.js va démarrer et écouter sur le port **8080**.
 Allez sur votre navigateur à l’adresse : [http://localhost:8080/](http://localhost:8080/) pour voir l'application complète !
 
-> **Tester l'API (Tâche 4 et Critère C4) :**
+> **Tester l'API :**
 > Notre API REST est accessible sous l'adresse `http://localhost:8080/gti525/v1/...`
-> Nous avons inclus un fichier nommé `MTL_Velo_API.postman_collection.json` à la racine du projet. Vous pouvez l'importer dans le logiciel Postman pour exécuter automatiquement nos 6 tests d'API !
+> Nous avons inclus un fichier nommé `MTL_Velo_API.postman_collection.json` à la racine du projet. Vous pouvez l'importer dans le logiciel Postman pour exécuter automatiquement nos tests d'API !
 
 ---
 

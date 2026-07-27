@@ -181,9 +181,9 @@
 
 ## Décision 8 - Architecture et intégration du Vélobot (T6)
 
-**Auteur** : Omar Khudhair - 2026-07-25
+**Auteur** : Omar Khudhair - 2026-07-25 - commit `8912121`
 
-**Problème** : Pour la Tâche 6, on devait ajouter un chatbot (le Vélobot) pour répondre à des questions sur les pistes et les compteurs avec l'IA Gemini. Le gros défi c'était de s'assurer que l'IA donne les vrais chiffres de notre BD SQLite sans inventer de fausses données (critère T6.4).
+**Problème** : Pour la Tâche 6, on devait ajouter un chatbot (le Vélobot) pour répondre à des questions sur les pistes et les compteurs avec l'IA Gemini. Le gros défi c'était de s'assurer que l'IA donne les vrais chiffres de notre BD SQLite sans inventer de fausses données (critère T6.4). Il fallait aussi définir clairement ce que notre assistant peut comprendre (intentions), comment il doit répondre, et comment il gère les cas non reconnus (T7.3).
 
 **Alternatives envisagées** :
 
@@ -194,4 +194,46 @@
 
 **Choix retenu** : L'approche avec les outils JSON (Function Calling) avec la librairie `@google/genai`.
 
-**Justification** : C'est beaucoup plus sécuritaire et précis. En gros, j'ai donné 3 outils à l'IA pour ses requêtes. Quand on pose une question, l'IA choisit le bon outil, notre serveur exécute le vrai code SQL en arrière-plan et on renvoie le résultat brut (JSON) à l'IA pour qu'elle fasse sa phrase. Comme ça, c'est impossible qu'elle invente des chiffres. J'ai aussi mis tout ce code dans `src/utils/velobotService.js` pour garder mon `server.js` propre.
+**Justification de l'architecture** : C'est beaucoup plus sécuritaire et précis. En gros, j'ai donné 3 outils à l'IA pour ses requêtes. Quand on pose une question, l'IA choisit le bon outil, notre serveur exécute le vrai code SQL en arrière-plan et on renvoie le résultat brut (JSON) à l'IA pour qu'elle fasse sa phrase. Comme ça, c'est impossible qu'elle invente des chiffres. J'ai aussi mis tout ce code dans `src/utils/velobotService.js` pour garder mon `server.js` propre.
+
+**Design de l'assistant (Intentions et Format) :**
+- **Intentions reconnues (3 familles strictes)** :
+  1. *Statistiques de passages* : Comprendre une demande de trafic sur une période de temps précise.
+  2. *Infrastructures par arrondissement* : Trouver la longueur des pistes pour un arrondissement spécifique.
+  3. *Comparaison* : Comparer le trafic de deux arrondissements sur une même période.
+- **Format de réponse** : L'IA doit répondre en **texte brut uniquement**. Interdiction totale d'utiliser le formatage Markdown (pas de gras, pas d'italiques, pas de puces de liste) pour un rendu fluide dans notre interface.
+- **Gestion des cas non reconnus** : Si un utilisateur pose une question hors-sujet (ex: "Quel temps fait-il ?"), l'IA n'invente rien. Elle refuse poliment et redirige l'utilisateur vers ses trois capacités principales.
+
+**Exemples de questions-réponses testées :**
+
+✅ **Traitée correctement (Intention reconnue - Statistiques)** :
+- *Question* : "Peux-tu me donner le nombre total de passages de vélos enregistrés sur le réseau entre le 2022-07-01 et le 2022-07-31 ?"
+- *Réponse* : "Entre le 1er juillet 2022 et le 31 juillet 2022, il y a eu un total de 11204464 passages de vélos enregistrés sur le réseau cyclable de Montréal."
+
+❌ **Traitée incorrectement (Cas non reconnu)** :
+- *Question* : "Quel est le meilleur magasin pour acheter un casque de vélo dans Rosemont ?"
+- *Réponse* : "Je suis désolé, je n'ai pas accès aux informations sur les magasins de vélos. Je peux uniquement vous informer sur les statistiques de passages de compteurs ou sur la longueur des pistes cyclables des différents arrondissements."
+
+---
+
+## Décision 9 - Architecture globale de la Tâche 5 (Auth, Pagination et Pistes populaires)
+
+**Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
+
+**Problème** : Pour la tâche 5, on devait tout attacher ensemble : l'authentification (T5.1/T5.2), la pagination (T5.3) et le calcul de popularité des pistes (T5.4). Le gros défi c'était de faire tout ça sans que l'application React devienne super lente ou compliquée à gérer.
+
+**Alternatives envisagées** :
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Tout faire côté Client (React) | Moins de code backend à écrire, on garde la logique où on est habitués. | Les performances seraient désastreuses (on téléchargerait toute la BD d'un coup) et l'authentification ne serait pas vraiment sécurisée. |
+| Tout faire côté Serveur (SQL + JWT) | Sécurité maximale, l'app reste super rapide (on charge juste ce qu'on affiche), et le Frontend reste propre. | Demande de coder des requêtes SQL beaucoup plus avancées (`LIMIT`, `OFFSET`, calculs) et d'apprendre à gérer les tokens JWT. |
+
+**Choix retenu** : **Faire tout le travail lourd dans le backend avec du SQL et utiliser des tokens JWT.**
+
+**Justification** : 
+Honnêtement, faire tout ça côté client aurait été un cauchemar pour les performances. 
+1. **Auth** : On a décidé d'utiliser des jetons JWT pour l'authentification parce que ça fitte super bien avec le `AuthContext` de React (pas besoin de gérer des sessions compliquées sur le serveur). 
+2. **Pagination** : On a utilisé `LIMIT` et `OFFSET` en SQLite. Au lieu d'envoyer 5000 éléments au navigateur, on en envoie juste 20, c'est super fluide.
+3. **Pistes populaires** : C'est l'API qui fait le calcul lourd (`SUM/COUNT`) selon l'année, et React a juste à changer la couleur sur la carte. 
+L'IA nous a vraiment sauvé du temps pour écrire et structurer ces grosses requêtes SQL d'un seul coup.
