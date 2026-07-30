@@ -8,7 +8,9 @@
 
 ---
 
-## Entrée 1 - Ajout des boutons pour voir la carte, des limites de page et des données de réseau
+## Frontale
+
+### Entrée 1 - Ajout des boutons pour voir la carte, des limites de page et des données de réseau
 
 **Auteur** : Christian Junior Djomga - 2026-06-03 - commit `8c6ae234a4b3afb8d4053c39fdadfb1039a5c859` et `82f20d3d19d6c6e2f6ee6250609e7c7f6740e819`
 
@@ -27,7 +29,7 @@
 
 ---
 
-## Entrée 2 - Filtre par arrondissement (T3.3)
+### Entrée 2 - Filtre par arrondissement (T3.3)
 
 **Auteur** : Christian Junior Djomga - 2026-06-03 - commit `42ba90f9898c8017192a4a5638f0e10da759f4e5`
 
@@ -48,7 +50,7 @@
 
 ---
 
-## Entrée 3 - Thème de couleurs et accessibilité (T1.3)
+### Entrée 3 - Thème de couleurs et accessibilité (T1.3)
 
 **Auteur** : Omar Khudhair - 2026-06-04 - commit `7ba70b7`
 
@@ -70,7 +72,7 @@
 
 ---
 
-## Entrée 4 - Refactorisation avec Custom Hooks et composants modulaires (T2.1, T1.4)
+### Entrée 4 - Refactorisation avec Custom Hooks et composants modulaires (T2.1, T1.4)
 
 **Auteur** : Omar Khudhair - 2026-06-01 - commit `903aa92`
 
@@ -92,7 +94,7 @@
 
 ---
 
-## Entrée 5 - Filtre par arrondissement et algorithme GeoJSON (T2.3)
+### Entrée 5 - Filtre par arrondissement et algorithme GeoJSON (T2.3)
 
 **Auteur** : Omar Khudhair - 2026-06-03 - commit `baa21bf`
 
@@ -115,7 +117,7 @@
 
 ---
 
-## Entrée 6 - Menu de navigation mobile (Hamburger) (T1.2, T1.4)
+### Entrée 6 - Menu de navigation mobile (Hamburger) (T1.2, T1.4)
 
 **Auteur** : Omar Khudhair - 2026-06-03 - commit `5d60b5e`
 
@@ -137,7 +139,7 @@
 
 ---
 
-## Entrée 7 - Refactorisation globale et standards de commentaires
+### Entrée 7 - Refactorisation globale et standards de commentaires
 
 **Auteur** : Omar Khudhair - 2026-06-04 - commit `f8b5c23`
 
@@ -157,7 +159,9 @@
 - **Modifié** : J'ai refusé de sacrifier l'expérience utilisateur (UI) au profit d'un code "minimaliste". J'ai donc exigé un compromis pour avoir un beau design tout en gardant un code épuré.
 - **Leçon** : Quand on demande à une IA de "nettoyer", elle peut parfois supprimer des éléments de design essentiels. Il faut être ultra précis et directif (ex: "donne-moi le fichier entier", "ne fais pas de listes numérotées") pour obtenir exactement le résultat voulu sans perdre de temps.
 
-## Entrée 8 - Correctifs finaux de la Phase 1 (Pages manquantes, Thème, Erreurs réseau)
+---
+
+### Entrée 8 - Correctifs finaux de la Phase 1 (Pages manquantes, Thème, Erreurs réseau)
 
 **Auteur** : Omar Khudhair - 2026-06-30 - commit `7b76ace`
 
@@ -178,7 +182,9 @@
 - **Modifié** : L'IA avait inclus une section sur le backend et des membres fictifs dans la page "À propos". Il a fallu exiger qu'elle utilise nos vrais noms et se limite aux technologies de la Phase 1.
 - **Leçon** : Même lors d'une simple passe de correction de bogues, l'IA peut déborder et anticiper des fonctionnalités futures si on ne restreint pas explicitement son champ d'action au contexte actuel.
 
-## Entrée 9 - Implémentation de la carte interactive (T1)
+---
+
+### Entrée 9 - Implémentation de la carte interactive (T1)
 
 **Auteur** : Omar Khudhair - 2026-07-01 - commit `f1257ea`
 
@@ -198,7 +204,7 @@
 
 ---
 
-## Entrée 10 - Audit global et correctifs WCAG (Livrable 2)
+### Entrée 10 - Audit global et correctifs WCAG (Livrable 2)
 
 **Auteur** : Omar Khudhair - 2026-07-01 - commit `87fab3c`
 
@@ -217,26 +223,7 @@
 
 ---
 
-## Entrée 11 - Génération des tests d'API avec Postman (T5.A.4)
-
-**Auteur** : Omar Khudhair - 2026-07-01 - commit `702bda8`
-
-**Prompt** (Claude Sonnet 4.6) :
-
-> Je veux d'abord tester la tâche 4, il y avait des consignes supplémentaires sur les curl et des tests à faire. Donne-moi le plan puis génère une collection Postman avec plusieurs tests valides et invalides pour notre API.
-
-**Sortie** : L'IA a généré un fichier `MTL_Velo_API.postman_collection.json` contenant 6 requêtes, avec des petits scripts intégrés pour valider automatiquement les statuts HTTP (200, 400).
-
-**Modifications apportées** :
-- J'ai pris le fichier tel quel. J'ai juste importé la collection dans mon propre Postman pour vérifier que les tests passaient bien tous au vert (surtout les tests de sécurité avec les mauvaises dates).
-
-**Justification du jugement critique** :
-- **Accepté** : Le fichier généré marchait du premier coup. L'IA a même pensé à ajouter des tests d'erreurs (400) pour vérifier qu'on bloquait bien les mauvaises requêtes sans faire crasher le serveur.
-- **Leçon** : Demander à l'IA de générer directement un fichier Postman au format JSON est beaucoup plus efficace que de s'acharner à écrire des scripts cURL qui vont finir par planter sous Windows.
-
----
-
-## Entrée 12 - Boutons carte et passages (T.2)
+### Entrée 11 - Boutons carte et passages (T.2)
 
 **Auteur** : Christian Junior Djomga - 2026-07-01 - commit `9c70349`
 
@@ -255,7 +242,7 @@
 
 ---
 
-## Entrée 13 - Synchronisation carte-menu déroulant pour l'arrondissement (T.3)
+### Entrée 12 - Synchronisation carte-menu déroulant pour l'arrondissement (T.3)
 
 **Auteur** : Christian Junior Djomga - 2026-07-01 - commit `2d889f7`
 
@@ -274,7 +261,74 @@
 
 ---
 
-## Entrée 14 - Création du Vélobot avec Gemini (T6)
+## Dorsale
+
+### Entrée 13 - Génération des tests d'API avec Postman (T5.A.4)
+
+**Auteur** : Omar Khudhair - 2026-07-01 - commit `702bda8`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> Je veux d'abord tester la tâche 4, il y avait des consignes supplémentaires sur les curl et des tests à faire. Donne-moi le plan puis génère une collection Postman avec plusieurs tests valides et invalides pour notre API.
+
+**Sortie** : L'IA a généré un fichier `MTL_Velo_API.postman_collection.json` contenant 6 requêtes, avec des petits scripts intégrés pour valider automatiquement les statuts HTTP (200, 400).
+
+**Modifications apportées** :
+- J'ai pris le fichier tel quel. J'ai juste importé la collection dans mon propre Postman pour vérifier que les tests passaient bien tous au vert (surtout les tests de sécurité avec les mauvaises dates).
+
+**Justification du jugement critique** :
+- **Accepté** : Le fichier généré marchait du premier coup. L'IA a même pensé à ajouter des tests d'erreurs (400) pour vérifier qu'on bloquait bien les mauvaises requêtes sans faire crasher le serveur.
+- **Leçon** : Demander à l'IA de générer directement un fichier Postman au format JSON est beaucoup plus efficace que de s'acharner à écrire des scripts cURL qui vont finir par planter sous Windows.
+
+---
+
+### Entrée 14 - Pagination serveur et requêtes SQL complexes (T5.3, T5.4)
+
+**Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
+
+**Prompt** (Gemini Pro) :
+
+> Aide-moi à optimiser mes requêtes backend pour la tâche 5. Ajoute la pagination serveur (LIMIT et OFFSET) pour les compteurs et POI. Montre-moi aussi comment mettre en surbrillance les pistes populaires selon l'année directement en SQL (SUM/COUNT).
+
+**Sortie** : L'IA a généré tout le gros morceau backend pour l'accès aux données : les grosses requêtes SQL pour la pagination ultra-rapide et l'algorithme de calcul de la popularité, ainsi que la logique pour renvoyer ces données formatées à React.
+
+**Modifications apportées** :
+- **Pagination** : J'ai corrigé un bug gossant côté front où la page restait prise sur l'ancien numéro quand on faisait une nouvelle recherche. J'ai juste ajouté un `setPage(1)`.
+- **Carte (Popularité)** : L'IA a oublié que React-Leaflet ne met pas la carte à jour tout seul quand les données changent. J'ai dû rajouter un `key={mapDataVersion}` pour forcer le refresh.
+
+**Justification du jugement critique** :
+- **Accepté** : L'IA est vraiment forte pour faire des requêtes SQL complexes et performantes.
+- **Modifié** : J'ai dû patcher plusieurs petits bugs d'interface (le `setPage(1)` et le problème de cache de Leaflet).
+- **Leçon** : L'IA est super bonne pour coder le backend (la tuyauterie), mais elle oublie tout le temps les petits bugs bizarres de React. Il faut vraiment tester l'UI nous-mêmes.
+
+---
+
+## Sécurité
+
+### Entrée 15 - Système d'authentification JWT (T5.1, T5.2)
+
+**Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
+
+**Prompt** (Gemini Pro) :
+
+> Aide-moi à gérer la sécurité pour la tâche 5. Fais-moi le système de connexion et d'inscription avec la génération de JWT. Crée-moi aussi le middleware pour protéger l'API et le AuthContext dans React pour savoir si l'utilisateur est connecté.
+
+**Sortie** : L'IA a fourni tout le bloc d'infrastructure de sécurité : le cryptage des mots de passe avec bcrypt, la génération de tokens en Node.js, le middleware `requireAuth`, et le `AuthContext` côté frontend.
+
+**Modifications apportées** :
+- **Authentification** : J'ai dû brancher manuellement le token JWT dans les headers de nos requêtes fetch pour que le backend accepte les appels protégés.
+- **Déconnexion** : J'ai ajouté une fonction propre pour vider le `localStorage` quand l'utilisateur se déconnecte, ce que l'IA avait survolé un peu vite.
+
+**Justification du jugement critique** :
+- **Accepté** : La base de la cryptographie et de la création du JWT était solide et respectait les standards de l'industrie.
+- **Modifié** : J'ai dû m'assurer que le flow de déconnexion était bulletproof.
+- **Leçon** : L'IA est géniale pour générer le code complexe de sécurité, mais il faut toujours vérifier que le cycle de vie complet de l'utilisateur (connexion -> appels API -> déconnexion) fonctionne de A à Z.
+
+---
+
+## Fonctionnalité conversationnelle
+
+### Entrée 16 - Création du Vélobot avec Gemini (T6)
 
 **Auteur** : Omar Khudhair - 2026-07-25 - commit `8912121`
 
@@ -296,32 +350,11 @@
 
 ---
 
-## Entrée 15 - Implémentation complète de la Tâche 5 (Auth, Pagination, Carte)
-
-**Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
-
-**Prompt** (Gemini Pro) :
-
-> Aide-moi à faire la tâche 5 au complet. 1) Fais-moi le système de connexion avec JWT (T5.1, T5.2). 2) Ajoute la pagination serveur (LIMIT et OFFSET) pour les compteurs et POI, avec le useEffect dans React (T5.3). 3) Montre-moi comment mettre en surbrillance les pistes populaires sur la carte Leaflet selon l'année en SQL (T5.4).
-
-**Sortie** : L'IA a généré tout le gros morceau backend : le `AuthContext`, les middlewares pour protéger l'API, les grosses requêtes SQL pour la pagination et la popularité, et le code React pour la carte.
-
-**Modifications apportées** :
-- **Authentification** : J'ai dû brancher manuellement le token JWT dans les headers de nos requêtes fetch.
-- **Pagination** : J'ai corrigé un bug gossant où la page restait prise sur l'ancien numéro quand on faisait une nouvelle recherche. J'ai juste ajouté un `setPage(1)`.
-- **Carte (Popularité)** : L'IA a oublié que React-Leaflet ne met pas la carte à jour tout seul quand les couleurs changent. J'ai dû rajouter un `key={mapDataVersion}` pour forcer le refresh.
-
-**Justification du jugement critique** :
-- **Accepté** : L'IA est vraiment forte pour faire des requêtes SQL complexes et monter la base du JWT en Node.js.
-- **Modifié** : J'ai dû patcher plusieurs petits bugs d'interface (le `setPage(1)` et le problème de cache de Leaflet).
-- **Leçon** : L'IA est super bonne pour coder le backend (la tuyauterie), mais elle oublie tout le temps les petits bugs bizarres de React (comme le cache de Leaflet). Il faut vraiment tester l'UI nous-mêmes.
-
----
-
 ## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
 - **Invention de données CSV inexistantes** : L'IA assume parfois que nos données sont parfaites. Lors du filtre par arrondissement, elle a généré du code en assumant qu'il y avait une colonne "Arrondissement" dans le fichier `compteurs.csv`, ce qui était totalement faux. Elle a inventé la structure de données au lieu de vérifier.
+- **Vélobot et invention de réponses** : Au début, les règles ("system prompt") données au chatbot n'étaient pas assez strictes. L'IA hallucinait et inventait parfois des fausses statistiques ou des longueurs de pistes qui n'existaient pas juste pour faire des phrases complètes. Il a fallu restreindre ses règles au maximum pour la forcer à utiliser uniquement les vrais chiffres retournés par notre base de données sans rien extrapoler.
 
 ---
 

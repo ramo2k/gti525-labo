@@ -162,7 +162,7 @@
 
 ---
 
-## Décision 7 - Affichage des points sur la carte en modale
+## Décision 9 - Affichage des points sur la carte en modale
 
 **Auteur** : Christian Junior Djomga - 2026-07-01 - commit `702bda8`
 
@@ -179,7 +179,7 @@
 
 ---
 
-## Décision 8 - Architecture et intégration du Vélobot (T6)
+## Décision 10 - Architecture et intégration du Vélobot (T6)
 
 **Auteur** : Omar Khudhair - 2026-07-25 - commit `8912121`
 
@@ -206,19 +206,19 @@
 
 **Exemples de questions-réponses testées :**
 
-✅ **Traitée correctement (Intention reconnue - Statistiques)** :
+**Traitée correctement (Intention reconnue - Statistiques)** :
 - *Question* : "Peux-tu me donner le nombre total de passages de vélos enregistrés sur le réseau entre le 2022-07-01 et le 2022-07-31 ?"
 - *Réponse* : "Entre le 1er juillet 2022 et le 31 juillet 2022, il y a eu un total de 11204464 passages de vélos enregistrés sur le réseau cyclable de Montréal."
 
-❌ **Traitée incorrectement (Cas non reconnu)** :
+**Traitée incorrectement (Cas non reconnu)** :
 - *Question* : "Quel est le meilleur magasin pour acheter un casque de vélo dans Rosemont ?"
 - *Réponse* : "Je suis désolé, je n'ai pas accès aux informations sur les magasins de vélos. Je peux uniquement vous informer sur les statistiques de passages de compteurs ou sur la longueur des pistes cyclables des différents arrondissements."
 
 ---
 
-## Décision 9 - Architecture globale de la Tâche 5 (Auth, Pagination et Pistes populaires)
+## Décision 11 - Architecture globale de la Tâche 5 (Auth, Pagination et Pistes populaires)
 
-**Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
+**Auteur** : Omar Khudhair - 2026-07-26 - commit `ebb35b4`
 
 **Problème** : Pour la tâche 5, on devait tout attacher ensemble : l'authentification (T5.1/T5.2), la pagination (T5.3) et le calcul de popularité des pistes (T5.4). Le gros défi c'était de faire tout ça sans que l'application React devienne super lente ou compliquée à gérer.
 
