@@ -1,4 +1,4 @@
-# Journal de démarche - MTL Vélo (Phase 1)
+# Journal de démarche - MTL Vélo
 
 ---
 

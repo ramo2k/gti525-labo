@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { useApi } from '../hooks/useApi';
 
 const Assistant = () => {
+  const { request, loading: isLoading, setLoading: setIsLoading } = useApi();
   // T6: Durée de vie de la conversation depuis les variables d'environnement (défaut 24h)
   const expirationMs = parseInt(import.meta.env.VITE_CHATBOT_EXPIRATION_MS) || 86400000;
 
@@ -21,7 +23,6 @@ const Assistant = () => {
   });
   
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   
   const [reportedIndexes, setReportedIndexes] = useState(() => {
     const saved = localStorage.getItem('velobot_reported');
@@ -70,23 +71,14 @@ const Assistant = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/gti525/v1/assistant', {
+      const data = await request('/assistant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: userQuestion })
       });
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.erreur || "Erreur lors de la communication avec l'assistant.");
-      }
-
       setMessages(prev => [...prev, { role: 'bot', text: data.reponse, questionOriginale: userQuestion }]);
     } catch (err) {
       setMessages(prev => [...prev, { role: 'bot', text: `Erreur: ${err.message}`, isError: true }]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -95,9 +87,8 @@ const Assistant = () => {
     if (reportedIndexes.has(index) || !msg.questionOriginale) return;
     
     try {
-      await fetch('/gti525/v1/assistant/signalement', {
+      await request('/assistant/signalement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: msg.questionOriginale, reponse: msg.text })
       });
       
@@ -173,6 +164,7 @@ const Assistant = () => {
               }
             }}
             rows={3}
+            maxLength={1000}
             placeholder="Pose ta question ici... (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
             className="flex-1 border border-mtl-texte/30 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:border-mtl-primaire focus:ring-1 focus:ring-mtl-primaire resize-y min-h-[60px] max-h-[250px]"
           />

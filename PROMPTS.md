@@ -1,4 +1,4 @@
-# PROMPTS.md - Exemple
+# Journal des prompts IA – MTL Vélo
 
 ## Équipe et parcours
 
@@ -303,9 +303,52 @@
 
 ---
 
-## Sécurité
+### Entrée 15 - Implémentation complète de l'API REST (T1, T2, T3)
 
-### Entrée 15 - Système d'authentification JWT (T5.1, T5.2)
+**Auteur** : Christian Junior Djomga - 2026-07-22 - commit `d5710e8`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> En prenant le role d'un développeur et en considerant le stack utilisé dans le projet, aide moi a implémenter les 3 premieres taches à réaliser
+
+**Sortie** : Extension complète de `import_sqlite.py` (précalcul de l'arrondissement et de la catégorie des pistes, nouvelles tables `pointsdinteret` et `pistes`) et réécriture complète de `server.js` avec 9 routes (auto-documentation, compteurs paginés, compteur unique, passages agrégés, POI paginés, CRUD POI protégé par jeton, pistes en GeoJSON avec logique de pistes populaires).
+
+**Modifications apportées** :
+- Aucune modification manuelle du code — l'IA a elle-même testé chaque route avec de vraies requêtes `curl` sur les vraies données avant de me livrer le résultat final, et a corrigé plusieurs bugs qu'elle a trouvés elle-même en testant (ex. gestion des pistes en `MultiLineString`, pas seulement `LineString`).
+
+**Justification du jugement critique** :
+- **Accepté** : Contrairement à nos échanges précédents où je devais souvent tester et rapporter les bugs moi-même, cette fois l'IA a proactivement fait tourner le script d'import et démarré le serveur dans son propre environnement pour vérifier que ça fonctionnait vraiment avec mes fichiers CSV/GeoJSON réels, plutôt que de me livrer du code jamais exécuté.
+- **Leçon** : Donner accès aux vrais fichiers de données ET au document d'énoncé complet en même temps (plutôt que de résumer l'énoncé moi-même) a permis à l'IA de respecter des détails précis (comme le format exact de réponse `{ donnees, total, page, limite }`) que j'aurais pu mal résumer ou oublier de mentionner.
+
+---
+
+## Fonctionnalité conversationnelle
+
+### Entrée 16 - Création du Vélobot avec Gemini (T6)
+
+**Auteur** : Omar Khudhair - 2026-07-25 - commit `8912121`
+
+**Prompt** (Gemini Pro) :
+
+> Je dois faire un bot IA pour mon site (T6). Le bot doit répondre à 3 types de questions (Statistiques, Pistes par arrondissement, Comparaison). Code-moi la logique backend dans un fichier séparé `velobotService.js` avec la librairie `@google/genai`. 
+> *(Puis, à cause d'un bogue avec Gemini)* : Erreur Vélobot: ApiError: 404 This model models/gemini-2.5-flash is no longer available... Enlève les balises gras dans les réponses.
+
+**Sortie** : L'IA a écrit tout le fichier `velobotService.js` avec la logique des outils (Function Calling) pour la BD SQLite et le prompt système de base.
+
+**Modifications apportées** :
+- J'ai dû changer le modèle de l'IA pour `gemini-3.5-flash-lite` parce que les anciennes versions boguaient ou bloquaient ma nouvelle clé API.
+- J'ai dû ajouter une phrase stricte dans les instructions de l'IA (`N'utilise AUCUN formatage Markdown, ni gras (**), ni italique`) parce qu'elle mettait tout le temps du texte en gras, ce qui n'était pas beau dans le chat de notre site.
+
+**Justification du jugement critique** :
+- **Accepté** : La stratégie d'utiliser des "outils JSON" pour l'IA marchait super bien. J'ai même fait un script à part pour revérifier les chiffres générés par l'IA et tout était parfait, zéro invention.
+- **Modifié** : J'ai dû corriger la version de l'API parce que le code initial plantait. J'ai aussi dû forcer l'IA à parler en texte brut pour respecter le design du site.
+- **Leçon** : Les modèles de Google changent tellement vite qu'il faut toujours aller lire la vraie documentation au lieu de faire confiance au vieux code de l'IA. Aussi, l'IA a tendance à trop formater ses réponses, il faut être super direct avec elle pour avoir du texte normal.
+
+---
+
+## Revue critique
+
+### Entrée 17 - Système d'authentification JWT (T5.1, T5.2)
 
 **Auteur** : Omar Khudhair - 2026-07-26 - commit `...`
 
@@ -326,50 +369,7 @@
 
 ---
 
-## Fonctionnalité conversationnelle
-
-### Entrée 16 - Création du Vélobot avec Gemini (T6)
-
-**Auteur** : Omar Khudhair - 2026-07-25 - commit `8912121`
-
-**Prompt** (Gemini Pro) :
-
-> Je dois faire un bot IA pour mon site (T6). Le bot doit répondre à 3 types de questions (Statistiques, Pistes par arrondissement, Comparaison). Code-moi la logique backend dans un fichier séparé `velobotService.js` avec la librairie `@google/genai`. 
-*(Puis, à cause d'un bogue avec Gemini)* : Erreur Vélobot: ApiError: 404 This model models/gemini-2.5-flash is no longer available... Enlève les balises gras dans les réponses.
-
-**Sortie** : L'IA a écrit tout le fichier `velobotService.js` avec la logique des outils (Function Calling) pour la BD SQLite et le prompt système de base.
-
-**Modifications apportées** :
-- J'ai dû changer le modèle de l'IA pour `gemini-3.5-flash-lite` parce que les anciennes versions boguaient ou bloquaient ma nouvelle clé API.
-- J'ai dû ajouter une phrase stricte dans les instructions de l'IA (`N'utilise AUCUN formatage Markdown, ni gras (**), ni italique`) parce qu'elle mettait tout le temps du texte en gras, ce qui n'était pas beau dans le chat de notre site.
-
-**Justification du jugement critique** :
-- **Accepté** : La stratégie d'utiliser des "outils JSON" pour l'IA marchait super bien. J'ai même fait un script à part pour revérifier les chiffres générés par l'IA et tout était parfait, zéro invention.
-- **Modifié** : J'ai dû corriger la version de l'API parce que le code initial plantait. J'ai aussi dû forcer l'IA à parler en texte brut pour respecter le design du site.
-- **Leçon** : Les modèles de Google changent tellement vite qu'il faut toujours aller lire la vraie documentation au lieu de faire confiance au vieux code de l'IA. Aussi, l'IA a tendance à trop formater ses réponses, il faut être super direct avec elle pour avoir du texte normal.
-
----
-
-## Entrée 16 - Implémentation complète de l'API REST (T1, T2, T3)
-
-**Auteur** : Christian Junior Djomga - 2026-07-22 - commit `d5710e8`
-
-**Prompt** (Claude Sonnet 4.6) :
-
-> En prenant le role d'un développeur et en considerant le stack utilisé dans le projet, aide moi a implémenter les 3 premieres taches à réaliser
-
-**Sortie** : Extension complète de `import_sqlite.py` (précalcul de l'arrondissement et de la catégorie des pistes, nouvelles tables `pointsdinteret` et `pistes`) et réécriture complète de `server.js` avec 9 routes (auto-documentation, compteurs paginés, compteur unique, passages agrégés, POI paginés, CRUD POI protégé par jeton, pistes en GeoJSON avec logique de pistes populaires).
-
-**Modifications apportées** :
-- Aucune modification manuelle du code — l'IA a elle-même testé chaque route avec de vraies requêtes `curl` sur les vraies données avant de me livrer le résultat final, et a corrigé plusieurs bugs qu'elle a trouvés elle-même en testant (ex. gestion des pistes en `MultiLineString`, pas seulement `LineString`).
-
-**Justification du jugement critique** :
-- **Accepté** : Contrairement à nos échanges précédents où je devais souvent tester et rapporter les bugs moi-même, cette fois l'IA a proactivement fait tourner le script d'import et démarré le serveur dans son propre environnement pour vérifier que ça fonctionnait vraiment avec mes fichiers CSV/GeoJSON réels, plutôt que de me livrer du code jamais exécuté.
-- **Leçon** : Donner accès aux vrais fichiers de données ET au document d'énoncé complet en même temps (plutôt que de résumer l'énoncé moi-même) a permis à l'IA de respecter des détails précis (comme le format exact de réponse `{ donnees, total, page, limite }`) que j'aurais pu mal résumer ou oublier de mentionner.
-
----
-
-## Entrée 17 - Implémentation de l'authentification (T4)
+### Entrée 18 - Implémentation de l'authentification (T4)
 
 **Auteur** : Christian Junior Djomga - 2026-07-25 - commit `91d4837`
 
@@ -388,10 +388,34 @@
 
 ---
 
-## Hallucinations rencontrées 
+### Entrée 19 - Refactorisation finale MVC, UI et Sécurité (Labo 2 & 3)
+
+**Auteur** : Omar Khudhair - 2026-07-27 - commit `...`
+
+**Prompt** (Gemini Pro) :
+
+> Je veux que tu le restructures pour qu'il respecte parfaitement le patron d'architecture MVC (Modèle-Vue-Contrôleur). Fais aussi une passe sur tout le front-end React pour éliminer la duplication de code, créer des hooks ou composants réutilisables là où c'est pertinent, et optimiser les performances (particulièrement pour la carte et les appels API). Assure-toi que la sécurité et la validation des données soient robustes partout (ex: formulaires, dates). Enfin, vérifie si le code du Vélobot peut être optimisé pour être plus performant et sécuritaire.
+
+**Sortie** : L'IA a effectué une analyse critique approfondie du code existant et a dressé un plan d'implémentation strict couvrant 4 aspects majeurs : le passage vers une architecture MVC complète (séparation des routes et contrôleurs), l'amélioration de la sécurité (vérification de la BD dans le middleware JWT et standardisation des erreurs JSON), l'optimisation des requêtes du Vélobot, et diverses améliorations du Frontend (création des hooks `useApi` et `useArrondissements`, extraction d'un composant `PasswordInput`, contraintes strictes sur les dates). L'IA a ensuite généré le code pour appliquer l'intégralité de ce plan.
+
+**Modifications apportées** :
+- J'ai demandé de modifier le plan initial de l'IA pour m'assurer que les commentaires identifiant les tâches spécifiques (T1.1, T3.2, etc.) soient soigneusement conservés et déplacés au-dessus de leurs fonctions respectives lors de la migration du code de `server.js` vers le dossier `controllers/`.
+- J'ai exigé la suppression complète de certains comportements suggérés ou intégrés par l'IA dans l'UI (comme l'auto-focus d'un champ de date à l'autre et des emojis superflus).
+- J'ai demandé à l'IA de ne plus "hardcoder" la liste des territoires, mais de la lire dynamiquement depuis le fichier CSV en créant le hook personnalisé `useArrondissements` dans le dossier `utils`.
+- J'ai aussi forcé l'IA à déplacer son fichier `velobotService.js` (qui contient la clé API Gemini) en dehors du dossier `src/` vers un nouveau dossier `services/` à la racine. L'IA l'avait mis par erreur dans le frontend, ce qui aurait pu fuiter la clé API côté client et causer un gros problème de sécurité.
+
+**Justification du jugement critique** :
+- **Accepté** : La capacité de l'IA à effectuer un audit global, puis à organiser une refactorisation majeure (passer d'un fichier monolithique `server.js` à une architecture MVC propre avec dossiers) sans casser les fonctionnalités existantes était impressionnante. L'extraction dynamique des données CSV dans des Hooks réutilisables a grandement amélioré la qualité du code.
+- **Modifié** : L'IA a parfois tendance à oublier de préserver les métadonnées ou les commentaires existants importants (comme les balises de notation T-X) lorsqu'on lui demande de "nettoyer" ou de "refactoriser" du code. Il a fallu l'obliger explicitement à les garder.
+- **Leçon** : Lorsqu'on demande à l'IA d'auditer et d'améliorer globalement un code pour une remise, il faut toujours lui rappeler les critères d'évaluation académiques, sinon elle optimisera uniquement pour la "propreté" du code en effaçant les traces exigées par les correcteurs.
+
+---
+
+## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
 - **Invention de données CSV inexistantes** : L'IA assume parfois que nos données sont parfaites. Lors du filtre par arrondissement, elle a généré du code en assumant qu'il y avait une colonne "Arrondissement" dans le fichier `compteurs.csv`, ce qui était totalement faux. Elle a inventé la structure de données au lieu de vérifier.
+- **L'intégration magique Client-Serveur (Oubli des JWT)** : Lors de la mise en place de l'authentification (Livrable 3), l'IA a codé un serveur parfait, mais a complètement "halluciné" le comportement du navigateur. Elle assumait que le front-end saurait magiquement attacher le jeton JWT à chaque requête vers l'API. J'ai dû coder manuellement l'injection du token dans les en-têtes (headers) HTTP et gérer sa suppression du `localStorage`, car l'IA a souvent tendance à négliger les mécanismes de communication réels entre le front-end et le back-end.
 - **Vélobot et invention de réponses** : Au début, les règles ("system prompt") données au chatbot n'étaient pas assez strictes. L'IA hallucinait et inventait parfois des fausses statistiques ou des longueurs de pistes qui n'existaient pas juste pour faire des phrases complètes. Il a fallu restreindre ses règles au maximum pour la forcer à utiliser uniquement les vrais chiffres retournés par notre base de données sans rien extrapoler.
 
 ---

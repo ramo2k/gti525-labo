@@ -103,13 +103,15 @@ const PassagesModal = ({ compteur, onClose }) => {
             <input
               type="date"
               value={dateFin}
+              min={dateDebut || undefined}
               onChange={(e) => setDateFin(e.target.value)}
               className="border border-mtl-texte/30 rounded p-2"
             />
           </div>
           <button
             onClick={genererGraphique}
-            className="bg-mtl-primaire text-white px-4 py-2 rounded hover:bg-green-800"
+            disabled={loading || (dateDebut && dateFin && dateDebut > dateFin)}
+            className={`px-4 py-2 rounded text-white ${loading || (dateDebut && dateFin && dateDebut > dateFin) ? 'bg-mtl-primaire/50 cursor-not-allowed' : 'bg-mtl-primaire hover:bg-green-800'}`}
           >
             Afficher
           </button>

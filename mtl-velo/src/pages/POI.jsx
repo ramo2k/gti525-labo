@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import { useArrondissements } from '../utils/useArrondissements';
 import PageLayout from '../components/PageLayout';
 import DataTable from '../components/DataTable';
 import MapModal from '../components/MapModal';
@@ -26,15 +27,8 @@ const POI = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [poiToEdit, setPoiToEdit] = useState(null);
 
-  // Territoires pour le filtre (codé en dur ou via fetch)
-  const territoires = useMemo(() => [
-    "Ahuntsic-Cartierville", "Anjou", "Côte-des-Neiges-Notre-Dame-de-Grâce",
-    "Lachine", "LaSalle", "Le Plateau-Mont-Royal", "Le Sud-Ouest",
-    "L'Île-Bizard-Sainte-Geneviève", "Mercier-Hochelaga-Maisonneuve",
-    "Montréal-Nord", "Outremont", "Pierrefonds-Roxboro",
-    "Rivière-des-Prairies-Pointe-aux-Trembles", "Rosemont-La Petite-Patrie",
-    "Saint-Laurent", "Saint-Léonard", "Verdun", "Ville-Marie", "Villeray-Saint-Michel-Parc-Extension"
-  ], []);
+  // Lecture dynamique des territoires
+  const { territoires } = useArrondissements();
 
   useEffect(() => {
     fetch('/data/territoires.geojson')

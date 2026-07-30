@@ -72,7 +72,8 @@ CREATE TABLE IF NOT EXISTS comptage_velo (
 )
 ''')
 
-# Nouveau (phase 3) : colonne Arrondissement précalculée
+# Table: compteurs
+# Description: Contient les détails des compteurs cyclables avec arrondissement précalculé.
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS compteurs (
     ID INTEGER PRIMARY KEY,
@@ -85,7 +86,19 @@ CREATE TABLE IF NOT EXISTS compteurs (
 )
 ''')
 
-# Nouveau (phase 3, T2.4) : table des points d'intérêt
+# Table: utilisateurs
+# Description: Contient les comptes utilisateurs (courriel, mot de passe haché) pour l'authentification.
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS utilisateurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    courriel TEXT UNIQUE NOT NULL,
+    mot_de_passe_hache TEXT NOT NULL,
+    date_creation TEXT DEFAULT CURRENT_TIMESTAMP
+)
+''')
+
+# Table: pointsdinteret
+# Description: Contient les points d'intérêt (fontaines, etc.) ajoutés par les utilisateurs.
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS pointsdinteret (
     ID INTEGER PRIMARY KEY,
@@ -98,7 +111,8 @@ CREATE TABLE IF NOT EXISTS pointsdinteret (
 )
 ''')
 
-# Nouveau (phase 3, T3) : table des pistes cyclables
+# Table: pistes
+# Description: Contient le réseau des pistes cyclables (tracés géographiques GeoJSON convertis).
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS pistes (
     id_cycl INTEGER PRIMARY KEY,

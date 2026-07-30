@@ -1,6 +1,7 @@
 import React, { useState, useContext, useMemo } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import PasswordInput from '../components/PasswordInput';
 
 function Auth() {
     const { login } = useContext(AuthContext);
@@ -10,8 +11,6 @@ function Auth() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -142,34 +141,10 @@ function Auth() {
                         <label className="block text-sm font-medium text-mtl-texte mb-1">
                             Mot de passe
                         </label>
-                        <div className="relative">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-2 border border-slate-300 rounded focus:outline-none focus:border-mtl-primaire pr-10"
-                                placeholder="********"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-mtl-primaire"
-                            >
-                                {showPassword ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                        <line x1="20" y1="4" x2="4" y2="20" />
-                                    </svg>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                )}
-                            </button>
-                        </div>
+                        <PasswordInput 
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                         
                         {/* Indicateurs de robustesse (visibles seulement en inscription) */}
                         {!isLoginMode && (
@@ -201,38 +176,12 @@ function Auth() {
                             <label className="block text-sm font-medium text-mtl-texte mb-1">
                                 Confirmer le mot de passe
                             </label>
-                            <div className="relative">
-                                <input
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    required
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-1 pr-10 ${
-                                        confirmPassword 
-                                        ? (isPasswordMatch ? 'border-green-500 focus:ring-green-500' : 'border-red-500 focus:ring-red-500') 
-                                        : 'border-slate-300 focus:border-mtl-primaire'
-                                    }`}
-                                    placeholder="********"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-mtl-primaire"
-                                >
-                                    {showConfirmPassword ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
-                                            <circle cx="12" cy="12" r="3"/>
-                                            <line x1="20" y1="4" x2="4" y2="20" />
-                                        </svg>
-                                    ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
-                                            <circle cx="12" cy="12" r="3"/>
-                                        </svg>
-                                    )}
-                                </button>
-                            </div>
+                            <PasswordInput 
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                isSuccess={confirmPassword && isPasswordMatch}
+                                isError={confirmPassword && !isPasswordMatch}
+                            />
                             
                             {/* Indicateur de correspondance */}
                             {confirmPassword && (

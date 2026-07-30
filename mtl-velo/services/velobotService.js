@@ -4,6 +4,56 @@ import path from 'path';
 
 const logFilePath = path.join(process.cwd(), 'logs', 'velobot.log');
 
+// Initialisation globale pour éviter de recréer l'instance à chaque requête
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const systemInstruction = `Tu es le Vélobot, un assistant expert sur le réseau cyclable de Montréal.
+Règles strictes :
+1. Tu ne dois JAMAIS inventer de chiffres (aucune hallucination).
+2. Si la donnée n'est pas disponible, tu dois le dire explicitement (ex: "Je n'ai pas de données pour cette requête.").
+3. Utilise toujours les outils à ta disposition pour trouver les données avant de répondre.
+4. Réponds toujours en français de manière polie et concise.`;
+
+const getPassagesStatsDeclaration = {
+    name: 'get_passages_stats',
+    description: "Obtenir la somme totale des passages de vélos sur tous les compteurs pour une période donnée.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {
+            debut: { type: Type.STRING, description: "Date de début (YYYY-MM-DD)" },
+            fin: { type: Type.STRING, description: "Date de fin (YYYY-MM-DD)" }
+        },
+        required: ['debut', 'fin']
+    }
+};
+
+const getPistesArrondissementDeclaration = {
+    name: 'get_pistes_arrondissement',
+    description: "Obtenir des informations sur les pistes cyclables (catégorie, longueur totale, nombre) dans un arrondissement spécifique.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {
+            arrondissement: { type: Type.STRING, description: "Le nom de l'arrondissement (ex: Le Plateau-Mont-Royal)" }
+        },
+        required: ['arrondissement']
+    }
+};
+
+const comparerArrondissementsDeclaration = {
+    name: 'comparer_passages_arrondissements',
+    description: "Comparer la somme des passages de vélos entre deux arrondissements sur une période donnée.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {
+            arrondissement1: { type: Type.STRING, description: "Le nom du premier arrondissement" },
+            arrondissement2: { type: Type.STRING, description: "Le nom du deuxième arrondissement" },
+            debut: { type: Type.STRING, description: "Date de début (YYYY-MM-DD)" },
+            fin: { type: Type.STRING, description: "Date de fin (YYYY-MM-DD)" }
+        },
+        required: ['arrondissement1', 'arrondissement2', 'debut', 'fin']
+    }
+};
+
 export function logSignalement(question, reponse) {
     const timestamp = new Date().toISOString();
     const logMsg = `[${timestamp}] SIGNALEMENT ERREUR - Q: "${question}" | R: "${reponse}"\n`;
@@ -16,55 +66,6 @@ export async function askVelobot(question, dbAll, reqIp) {
     let finalAnswer = '';
 
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-        const systemInstruction = `Tu es le Vélobot, un assistant expert sur le réseau cyclable de Montréal.
-Règles strictes :
-1. Tu ne dois JAMAIS inventer de chiffres (aucune hallucination).
-2. Si la donnée n'est pas disponible, tu dois le dire explicitement (ex: "Je n'ai pas de données pour cette requête.").
-3. Utilise toujours les outils à ta disposition pour trouver les données avant de répondre.
-4. Réponds toujours en français de manière polie et concise.`;
-
-        const getPassagesStatsDeclaration = {
-            name: 'get_passages_stats',
-            description: "Obtenir la somme totale des passages de vélos sur tous les compteurs pour une période donnée.",
-            parameters: {
-                type: Type.OBJECT,
-                properties: {
-                    debut: { type: Type.STRING, description: "Date de début (YYYY-MM-DD)" },
-                    fin: { type: Type.STRING, description: "Date de fin (YYYY-MM-DD)" }
-                },
-                required: ['debut', 'fin']
-            }
-        };
-
-        const getPistesArrondissementDeclaration = {
-            name: 'get_pistes_arrondissement',
-            description: "Obtenir des informations sur les pistes cyclables (catégorie, longueur totale, nombre) dans un arrondissement spécifique.",
-            parameters: {
-                type: Type.OBJECT,
-                properties: {
-                    arrondissement: { type: Type.STRING, description: "Le nom de l'arrondissement (ex: Le Plateau-Mont-Royal)" }
-                },
-                required: ['arrondissement']
-            }
-        };
-
-        const comparerArrondissementsDeclaration = {
-            name: 'comparer_passages_arrondissements',
-            description: "Comparer la somme des passages de vélos entre deux arrondissements sur une période donnée.",
-            parameters: {
-                type: Type.OBJECT,
-                properties: {
-                    arrondissement1: { type: Type.STRING, description: "Le nom du premier arrondissement" },
-                    arrondissement2: { type: Type.STRING, description: "Le nom du deuxième arrondissement" },
-                    debut: { type: Type.STRING, description: "Date de début (YYYY-MM-DD)" },
-                    fin: { type: Type.STRING, description: "Date de fin (YYYY-MM-DD)" }
-                },
-                required: ['arrondissement1', 'arrondissement2', 'debut', 'fin']
-            }
-        };
-
         let contents = [
             { role: 'user', parts: [{ text: question }] }
         ];

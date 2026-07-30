@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout';
 import MapNetwork from '../components/MapNetwork';
 import NetworkFilters from '../components/NetworkFilters';
 import NetworkStatsPanel from '../components/NetworkStatsPanel';
-import { useCSV } from '../hooks/useCSV';
+import { useArrondissements } from '../utils/useArrondissements';
 import { useMapFilters } from '../hooks/useMapFilters';
 
 const ReseauCyclable = () => {
@@ -16,7 +16,7 @@ const ReseauCyclable = () => {
 
   // Carte + liste des arrondissements pour le nouveau filtre
   const [territoiresGeoJson, setTerritoiresGeoJson] = useState(null);
-  const { data: territoiresData } = useCSV('/data/territoires.csv', { header: false });
+  const { territoires } = useArrondissements();
   const [arrondissement, setArrondissement] = useState('');
 
   // Nouveaux états pour le filtre de popularité (T5.4)
@@ -24,11 +24,6 @@ const ReseauCyclable = () => {
   const [populaireFin, setPopulaireFin] = useState('');
   const [filterError, setFilterError] = useState(null);
   const [filterSuccess, setFilterSuccess] = useState(null);
-
-  const territoires = useMemo(() => {
-    if (!territoiresData) return [];
-    return territoiresData.map(row => row[0]).sort();
-  }, [territoiresData]);
 
   useEffect(() => {
     fetch('/data/territoires.geojson')
@@ -104,11 +99,11 @@ const ReseauCyclable = () => {
     filterFeature 
   } = useMapFilters(geoJson);
 
-  const filterFeatureFinal = (feature) => {
+  const filterFeatureFinal = useCallback((feature) => {
     if (!filterFeature(feature)) return false;
     if (!arrondissement) return true;
     return feature.properties.arrondissement === arrondissement;
-  };
+  }, [filterFeature, arrondissement]);
 
   const stats = useMemo(() => {
     if (!geoJson) return { totalSegments: 0, totalLengthKm: 0 };
@@ -166,12 +161,12 @@ const ReseauCyclable = () => {
 
             {filterError && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm font-medium">
-                ❌ {filterError}
+                {filterError}
               </div>
             )}
             {filterSuccess && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded text-sm font-medium transition-all">
-                ✅ {filterSuccess}
+                {filterSuccess}
               </div>
             )}
 
@@ -181,17 +176,7 @@ const ReseauCyclable = () => {
                 <input
                   type="date"
                   value={populaireDebut}
-                  onChange={(e) => {
-                    setPopulaireDebut(e.target.value);
-                    if (e.target.value && dateFinRef.current) {
-                      try {
-                        // Ouvre automatiquement le calendrier suivant (supporté sur navigateurs récents)
-                        setTimeout(() => dateFinRef.current.showPicker(), 50);
-                      } catch (err) {
-                        console.warn("showPicker non supporté par ce navigateur");
-                      }
-                    }
-                  }}
+                  onChange={(e) => setPopulaireDebut(e.target.value)}
                   className="border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white"
                 />
               </div>
@@ -201,6 +186,7 @@ const ReseauCyclable = () => {
                   type="date"
                   ref={dateFinRef}
                   value={populaireFin}
+                  min={populaireDebut || undefined}
                   onChange={(e) => setPopulaireFin(e.target.value)}
                   className="border border-mtl-texte/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-mtl-primaire bg-white"
                 />
@@ -208,8 +194,8 @@ const ReseauCyclable = () => {
               <div className="flex gap-2 mt-2 md:mt-0">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className={`px-4 py-2 rounded text-white font-medium ${loading ? 'bg-mtl-primaire/50' : 'bg-mtl-primaire hover:bg-mtl-survol'} transition-colors`}
+                  disabled={loading || (populaireDebut && populaireFin && populaireDebut > populaireFin)}
+                  className={`px-4 py-2 rounded text-white font-medium ${(loading || (populaireDebut && populaireFin && populaireDebut > populaireFin)) ? 'bg-mtl-primaire/50 cursor-not-allowed' : 'bg-mtl-primaire hover:bg-mtl-survol'} transition-colors`}
                 >
                   {loading ? 'Chargement...' : 'Filtrer les pistes'}
                 </button>
