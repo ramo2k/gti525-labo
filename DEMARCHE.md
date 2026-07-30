@@ -237,3 +237,61 @@ Honnêtement, faire tout ça côté client aurait été un cauchemar pour les pe
 2. **Pagination** : On a utilisé `LIMIT` et `OFFSET` en SQLite. Au lieu d'envoyer 5000 éléments au navigateur, on en envoie juste 20, c'est super fluide.
 3. **Pistes populaires** : C'est l'API qui fait le calcul lourd (`SUM/COUNT`) selon l'année, et React a juste à changer la couleur sur la carte. 
 L'IA nous a vraiment sauvé du temps pour écrire et structurer ces grosses requêtes SQL d'un seul coup.
+
+## Décision 12 - Stratégie de délégation du filtrage à la base de données (T1.2)
+
+**Auteur** : Christian Junior Djomga - 2026-07-22
+
+**Problème** : L'énoncé de la Phase 3 exige que tout le filtrage et la pagination soient délégués à la base de données (aucun filtrage en mémoire côté serveur). Le problème, c'est que ni `compteurs.csv` ni `reseau_cyclable.geojson` n'ont de colonne "Arrondissement" directement exploitable en SQL — cette info était calculée à la volée côté frontend (Décision 5) avec un algorithme géométrique (Ray-Casting).
+
+**Alternatives envisagées** :
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Recalculer l'arrondissement à chaque requête API (comme le faisait le frontend) | Aucun changement au script d'import, logique déjà écrite. | Beaucoup trop lent : refaire un test géométrique sur des milliers de pistes à *chaque* appel API va à l'encontre direct de l'exigence T1.2. |
+| Utiliser une extension SQLite géospatiale (SpatiaLite) pour faire de vraies requêtes spatiales en SQL | La solution "propre" en théorie, avec de vraies fonctions `ST_Contains`. | Demande d'installer et de charger une extension SQLite externe, ce qui complique le déploiement pour un projet d'école. |
+| Précalculer l'arrondissement (et la catégorie des pistes) **une seule fois, à l'import**, et le stocker comme colonne normale | Chaque requête API devient un simple `WHERE Arrondissement = ?` indexé, aussi rapide qu'un filtre sur n'importe quelle autre colonne. Réutilise l'algorithme déjà écrit et testé en Phase 1/2. | Le calcul n'est fait qu'une fois par import, donc si `territoires.geojson` change, il faut réimporter les données. |
+
+**Choix retenu** : Précalcul à l'import, stocké comme colonne (`Arrondissement` sur `compteurs`, `arrondissement` + `categorie` sur `pistes`).
+
+**Justification** : C'est le seul choix qui respecte vraiment l'esprit de T1.2 sans ajouter de dépendance externe compliquée (SpatiaLite). Le script `import_sqlite.py` reproduit en Python le même algorithme Ray-Casting déjà utilisé côté frontend, donc c'est cohérent avec le reste du projet plutôt qu'une nouvelle logique inventée. Le compromis (recalculer seulement à l'import, pas en temps réel) est documenté directement dans les commentaires du code.
+
+---
+
+## Décision 13 - Choix des librairies d'authentification (T4)
+
+**Auteur** : Christian Junior Djomga - 2026-07-25
+
+**Problème** : Il fallait choisir comment hacher les mots de passe et comment émettre/vérifier les jetons de session pour protéger les routes d'écriture (T2.5, T4.3).
+
+**Alternatives envisagées** :
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Mots de passe en clair ou avec un simple hash MD5/SHA256 | Aucune dépendance à installer. | Totalement inacceptable en sécurité — l'énoncé (P7) l'interdit explicitement, et n'importe quelle fuite de la base exposerait tous les mots de passe. |
+| `argon2` pour le hachage | Considéré comme le standard le plus moderne (gagnant du concours Password Hashing Competition). | Demande souvent une compilation native plus capricieuse sur certains environnements Windows. |
+| `bcrypt` pour le hachage + `jsonwebtoken` pour les jetons | Extrêmement bien documenté, standard de l'industrie depuis longtemps, énoncé du labo le mentionne explicitement comme option acceptée. | Légèrement plus lent qu'argon2 à configuration égale (négligeable à notre échelle). |
+| Sessions serveur (cookies + stockage en mémoire/BD) au lieu de JWT | Plus simple à révoquer immédiatement. | L'énoncé demande explicitement un jeton retourné par la route de connexion, donc les sessions ne correspondent pas au livrable demandé. |
+
+**Choix retenu** : `bcrypt` (12 rounds) + `jsonwebtoken`, avec le secret de signature dans une variable d'environnement (`dotenv`).
+
+**Justification** : bcrypt est explicitement autorisé par l'énoncé et évite les problèmes de compilation native qu'on a déjà eus par le passé avec d'autres dépendances natives (`sqlite3` par exemple). Le nombre de rounds (12) dépasse le minimum de 10 exigé, ce qui laisse une marge de sécurité sans ralentir l'inscription de façon perceptible. `dotenv` permet de respecter T4.4 (aucun secret commité) très simplement, avec un fichier `.env.example` documenté et un vrai `.env` ajouté au `.gitignore`.
+
+---
+
+## Décision 14 - Calcul des « pistes populaires » (T3.2)
+
+**Auteur** : Christian Junior Djomga - 2026-07-22
+
+**Problème** : T3.2 demande de trouver les 3 arrondissements avec le meilleur ratio (passages totaux ÷ nombre de compteurs) sur une période donnée, puis de retourner toutes les pistes de ces arrondissements. Il fallait décider où faire chaque étape du calcul : tout en SQL, ou une partie en JavaScript.
+
+**Alternatives envisagées** :
+
+| Option | Avantages | Inconvénients |
+|---|---|---|
+| Tout calculer en une seule requête SQL  | Un seul aller-retour à la base, potentiellement plus "pur" niveau SQL. | Le ratio rend la requête SQL bien plus complexe à lire et à déboguer pour un gain de performance minime, vu qu'il n'y a qu'une trentaine d'arrondissements à comparer. |
+| Agréger les sommes en SQL, puis calculer le ratio et garder le top 3 en JavaScript | Le SQL reste simple et lisible. Le tri/filtrage en JS ne porte que sur ~30 lignes (une par arrondissement), donc aucun problème de performance. | Techniquement, ce n'est plus "100 % SQL" — mais l'énoncé permet explicitement un calcul applicatif documenté pour la partie géospatiale/dérivée. |
+
+**Choix retenu** : Agrégation lourde en SQL, tri du top 3 en JavaScript.
+
+**Justification** : Cette répartition met chaque partie du calcul là où elle est la plus efficace : SQLite est optimisé pour sommer des millions de lignes rapidement (surtout avec l'index sur `id_compteur, date_heure`), alors que trier une trentaine de valeurs en JavaScript n'a aucun impact mesurable. Le choix est documenté directement en commentaire dans `server.js` pour respecter l'exigence de transparence de l'énoncé.

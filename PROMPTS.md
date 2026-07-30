@@ -350,6 +350,44 @@
 
 ---
 
+## Entrée 16 - Implémentation complète de l'API REST (T1, T2, T3)
+
+**Auteur** : Christian Junior Djomga - 2026-07-22 - commit `d5710e8`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> En prenant le role d'un développeur et en considerant le stack utilisé dans le projet, aide moi a implémenter les 3 premieres taches à réaliser
+
+**Sortie** : Extension complète de `import_sqlite.py` (précalcul de l'arrondissement et de la catégorie des pistes, nouvelles tables `pointsdinteret` et `pistes`) et réécriture complète de `server.js` avec 9 routes (auto-documentation, compteurs paginés, compteur unique, passages agrégés, POI paginés, CRUD POI protégé par jeton, pistes en GeoJSON avec logique de pistes populaires).
+
+**Modifications apportées** :
+- Aucune modification manuelle du code — l'IA a elle-même testé chaque route avec de vraies requêtes `curl` sur les vraies données avant de me livrer le résultat final, et a corrigé plusieurs bugs qu'elle a trouvés elle-même en testant (ex. gestion des pistes en `MultiLineString`, pas seulement `LineString`).
+
+**Justification du jugement critique** :
+- **Accepté** : Contrairement à nos échanges précédents où je devais souvent tester et rapporter les bugs moi-même, cette fois l'IA a proactivement fait tourner le script d'import et démarré le serveur dans son propre environnement pour vérifier que ça fonctionnait vraiment avec mes fichiers CSV/GeoJSON réels, plutôt que de me livrer du code jamais exécuté.
+- **Leçon** : Donner accès aux vrais fichiers de données ET au document d'énoncé complet en même temps (plutôt que de résumer l'énoncé moi-même) a permis à l'IA de respecter des détails précis (comme le format exact de réponse `{ donnees, total, page, limite }`) que j'aurais pu mal résumer ou oublier de mentionner.
+
+---
+
+## Entrée 17 - Implémentation de l'authentification (T4)
+
+**Auteur** : Christian Junior Djomga - 2026-07-25 - commit `91d4837`
+
+**Prompt** (Claude Sonnet 4.6) :
+
+> Suivant le meme principe que précédemment aide mon à implémenter la tache 4 et donne moi des moyens de tester la bonne implémentation des fonctionnalités
+
+**Sortie** : Ajout d'une table `utilisateurs`, des routes `POST /auth/inscription` et `POST /auth/connexion` (hachage bcrypt à 12 rounds, émission de JWT signé avec un secret lu depuis `.env`), remplacement du middleware `requireAuth` (qui ne vérifiait auparavant que la présence d'un en-tête) par une vraie vérification de signature (`jwt.verify`), et une liste de commandes `curl` pour tout tester : inscription, doublon de courriel, mot de passe trop court, connexion, mauvais mot de passe, jeton valide/invalide/mal signé/expiré.
+
+**Modifications apportées** :
+- Aucune modification du code fourni. J'ai testé chaque commande `curl` fournie une par une, et une seule a semblé échouer au premier essai (jeton "invalide" alors que je pensais avoir utilisé le vrai) — en fait j'avais oublié de remplacer le placeholder `TON_JETON` par le vrai jeton reçu à l'étape précédente, ce que l'IA a immédiatement identifié en relisant ma commande.
+
+**Justification du jugement critique** :
+- **Accepté** : Le message d'erreur générique identique pour "courriel inexistant" et "mauvais mot de passe" (plutôt que deux messages différents) est un détail de sécurité que je n'aurais probablement pas pensé à demander moi-même — l'IA l'a ajouté et expliqué pourquoi (éviter de révéler quels courriels sont déjà enregistrés) sans que je le demande explicitement.
+- **Leçon** : Avant de rapporter un bug à l'IA, il vaut la peine de relire attentivement ma propre commande — dans ce cas-ci, ce n'était pas un bug du serveur mais une erreur de copier-coller de ma part (un placeholder laissé tel quel). Ça confirme une leçon déjà notée plus haut (Entrée 5) : il faut être rigoureux avant d'assumer que l'erreur vient du code généré.
+
+---
+
 ## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
