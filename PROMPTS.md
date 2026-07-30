@@ -390,7 +390,7 @@
 
 ### Entrée 19 - Refactorisation finale MVC, UI et Sécurité (Labo 2 & 3)
 
-**Auteur** : Omar Khudhair - 2026-07-27 - commit `...`
+**Auteur** : Omar Khudhair - 2026-07-29 - commit `6383439`
 
 **Prompt** (Gemini Pro) :
 
@@ -411,7 +411,8 @@
 
 ---
 
-## Hallucinations rencontrées 
+
+## Hallucinations rencontrées 
 
 - **Tailwind CSS inventé et excessif** : L'IA a souvent tendance à "halluciner" du code de style. Elle ajoutait régulièrement des tonnes de classes Tailwind CSS (des ombres complexes, des marges inutiles, des couleurs non demandées) qui alourdissaient le code pour rien sans que je le demande.
 - **Invention de données CSV inexistantes** : L'IA assume parfois que nos données sont parfaites. Lors du filtre par arrondissement, elle a généré du code en assumant qu'il y avait une colonne "Arrondissement" dans le fichier `compteurs.csv`, ce qui était totalement faux. Elle a inventé la structure de données au lieu de vérifier.
